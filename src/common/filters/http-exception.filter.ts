@@ -1,6 +1,5 @@
 import { ExceptionFilter, Catch, ArgumentsHost, HttpException, HttpStatus } from '@nestjs/common';
 import { Response } from 'express';
-import { ApiResponseDto } from '../dto/response.dto';
 
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
@@ -12,9 +11,9 @@ export class AllExceptionsFilter implements ExceptionFilter {
             ? exception.getStatus()
             : HttpStatus.INTERNAL_SERVER_ERROR;
 
-        let errorResponseObj = exception instanceof HttpException
-            ? exception.getResponse()
-            : { message: 'Internal server error' };
+        let errorResponseObj: { [key: string]: any } = exception instanceof HttpException
+            ? exception.getResponse() as { [key: string]: any }
+            : { message: 'Internal server error', statusCode: statusCode };
 
         if (exception instanceof Error && exception.name === 'ValidationError') {
             errorResponseObj = {
@@ -23,13 +22,11 @@ export class AllExceptionsFilter implements ExceptionFilter {
             };
         }
 
-        console.log(exception);
+        const responseObj = {
+            ...errorResponseObj,
+            statusCode: statusCode
+        }
 
-        const errorResponse = new ApiResponseDto(
-            false,
-            errorResponseObj,
-        );
-
-        response.status(statusCode).json(errorResponse);
+        response.status(statusCode).json(responseObj);
     }
 }
