@@ -37,6 +37,12 @@ export class LessonService {
         return lessons;
     }
 
+    async getLessonCountByCourseId(courseId: string): Promise<number> {
+        const count = await this.lessonModel.countDocuments({ course: courseId }).exec();
+
+        return count;
+    }
+
     async updateLesson(lessonId: string, lesson: UpdateLessonDto): Promise<LessonModel> {
         const updatedLesson = await this.lessonModel.findByIdAndUpdate(lessonId, lesson, { new: true }).exec();
 
