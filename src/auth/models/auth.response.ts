@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class UserResponse {
   @ApiProperty({ example: '507f1f77bcf86cd799439011' })
-  id: string;
+  _id: string;
 
   @ApiProperty({ example: 'john.doe@example.com' })
   email: string;
@@ -18,12 +18,6 @@ export class UserResponse {
 
   @ApiProperty({ example: 'MANAGER' })
   role: string;
-
-  @ApiProperty({ 
-    type: [String], 
-    example: ['READ_USERS', 'CREATE_ROLE'] 
-  })
-  privileges: string[];
 
   @ApiProperty({ example: 'LOCAL', enum: ['LOCAL', 'GOOGLE'] })
   provider: string;

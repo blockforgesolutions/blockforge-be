@@ -9,11 +9,10 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 import { User, UserSchema } from '../user/user.schema';
 import { EmailVerification, EmailVerificationSchema } from './email-verification.schema';
 import { MailModule } from '../mail/mail.module';
-import { RoleGuard } from './guards/role.guard';
+import { RoleGuard } from '../common/guards/role.guard';
 import { PrivilegeGuard } from './guards/privilege.guard';
 import { Role, RoleSchema } from '../roles/role.schema';
 import { PasswordReset } from './password-reset.schema';
-import { EmployeeInvitation, EmployeeInvitationSchema } from '../employee/schemas/employee-invitation.schema';
 import { SchemaFactory } from '@nestjs/mongoose';
 
 @Module({
@@ -24,14 +23,13 @@ import { SchemaFactory } from '@nestjs/mongoose';
       { name: EmailVerification.name, schema: EmailVerificationSchema },
       { name: Role.name, schema: RoleSchema },
       { name: PasswordReset.name, schema: SchemaFactory.createForClass(PasswordReset) },
-      { name: EmployeeInvitation.name, schema: EmployeeInvitationSchema },
     ]),
     JwtModule.registerAsync({
       imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => ({
+      useFactory: (configService: ConfigService) => ({
         secret: configService.get('JWT_SECRET'),
         signOptions: {
-          expiresIn: configService.get('JWT_EXPIRATION'),
+          expiresIn: configService.get('JWT_EXPIRATION') || '3600s',
         },
       }),
       inject: [ConfigService],

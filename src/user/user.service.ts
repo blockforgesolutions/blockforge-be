@@ -20,26 +20,23 @@ export class UserService {
       .populate({
         path: 'role',
         select: '_id name description',
-        populate: {
-          path: 'privileges',
-          model: 'Privilege',
-          select: '_id name description resource action'
-        }
       })
       .lean();
+      
 
     if (!user) {
       throw new NotFoundException(UserMessages.USER_NOT_FOUND);
     }
-
     const transformedUser = transformMongoDocument(user);
     const transformedRole = transformMongoDocument(user.role);
-    const transformedPrivileges = user.role.privileges.map(transformMongoDocument);
+
+    if (!transformedUser || !transformedRole) {
+      throw new Error('Failed to transform user document');
+    }
 
     return {
       ...transformedUser,
-      role: transformedRole.name,
-      privileges: transformedPrivileges.map(p => p.name)
+      role: transformedRole.name
     } as CurrentUserResponse;
   }
 
@@ -55,11 +52,6 @@ export class UserService {
       .populate({
         path: 'role',
         select: '_id name description',
-        populate: {
-          path: 'privileges',
-          model: 'Privilege',
-          select: '_id name description resource action'
-        }
       })
       .lean();
       
@@ -69,12 +61,14 @@ export class UserService {
 
     const transformedUser = transformMongoDocument(updatedUser);
     const transformedRole = transformMongoDocument(updatedUser.role);
-    const transformedPrivileges = updatedUser.role.privileges.map(transformMongoDocument);
+    
+    if (!transformedUser || !transformedRole) {
+      throw new Error('Failed to transform user document');
+    }
 
     return {
       ...transformedUser,
-      role: transformedRole.name,
-      privileges: transformedPrivileges.map(p => p.name)
+      role: transformedRole.name   
     } as CurrentUserResponse;
   }
 

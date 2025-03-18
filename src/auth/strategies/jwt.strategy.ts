@@ -19,7 +19,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: configService.get<string>('JWT_SECRET'),
+      secretOrKey: configService.get<string>('JWT_SECRET') || 'defaultSecretKey',
     });
   }
 
@@ -30,35 +30,26 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       .populate({
         path: 'role',
         select: '_id name description',
-        populate: {
-          path: 'privileges',
-          select: '_id name description resource action'
-        }
-      })
-      .lean();
+      }).lean();
 
     if (!user) {
       throw new UnauthorizedException();
     }
 
-    // Extract privilege names and add them to user object
-    const privilegeNames = user.role?.privileges?.map(p => p.name) || [];
-
     // Create a new object with only the needed properties
     const userResponse = {
-      id: user._id.toString(),
+      id: user._id,
       email: user.email,
       name: user.name,
       surname: user.surname,
       phone: user.phone,
-      role: user.role?.name,
+      role: user.role.name,
       provider: user.provider,
       isPhoneVerified: user.isPhoneVerified,
       isEmailVerified: user.isEmailVerified,
       picture: user.picture,
-      privileges: privilegeNames
     };
 
     return userResponse;
   }
-} 
+}

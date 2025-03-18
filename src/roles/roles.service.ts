@@ -2,58 +2,38 @@ import { Injectable, NotFoundException, ConflictException, BadRequestException }
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Role } from './role.schema';
-import { Privilege } from './privilege.schema';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { RoleMessages } from '../common/enums/messages.enum';
 import { User } from '../user/user.schema';
-import { transformMongoDocument, transformMongoArray } from '../common/utils/mongo.utils';
-import { PrivilegeResponse, RoleResponse, CreateRoleResponse, UpdateRoleResponse } from './models/role.response';
+import { transformMongoDocument } from '../common/utils/mongo.utils';
+import { RoleResponse, CreateRoleResponse, UpdateRoleResponse } from './models/role.response';
 
 @Injectable()
 export class RolesService {
-  private readonly DEFAULT_ROLES = ['Yönetici', 'Personel'];
+  private readonly DEFAULT_ROLES = ['ADMIN', 'USER', 'INSTRUCTOR'];
 
   constructor(
     @InjectModel(Role.name) private roleModel: Model<Role>,
-    @InjectModel(Privilege.name) private privilegeModel: Model<Privilege>,
     @InjectModel(User.name) private userModel: Model<User>,
   ) {}
 
-  // Privilege operations
-  async findAllPrivileges(): Promise<PrivilegeResponse[]> {
-    const privileges = await this.privilegeModel.find().lean();
-    return privileges.map(transformMongoDocument);
-  }
 
   // Role operations
   async createRole(createRoleDto: CreateRoleDto, userId: string): Promise<CreateRoleResponse> {
+    console.log(createRoleDto);
+    
     const existingRole = await this.roleModel.findOne({ name: createRoleDto.name });
     if (existingRole) {
       throw new ConflictException(RoleMessages.ROLE_ALREADY_EXISTS);
-    }
-
-    // Validate privileges
-    const privileges = await this.privilegeModel.find({
-      _id: { $in: createRoleDto.privileges },
-    });
-
-    if (privileges.length !== createRoleDto.privileges.length) {
-      throw new BadRequestException(RoleMessages.INVALID_PRIVILEGE);
     }
 
     const role = await this.roleModel.create({
       ...createRoleDto,
       createdBy: userId,
     });
-
-    const populatedRole = await role.populate('privileges');
-    const transformedRole = transformMongoDocument(populatedRole.toObject());
-
+    
     return { 
-      role: {
-        ...transformedRole,
-        privileges: populatedRole.privileges.map(transformMongoDocument)
-      } as RoleResponse, 
+      role: role as RoleResponse, 
       message: RoleMessages.ROLE_CREATED_SUCCESS 
     };
   }
@@ -73,7 +53,7 @@ export class RolesService {
       const transformedRole = transformMongoDocument(role);
       return {
         ...transformedRole,
-        privileges: role.privileges.map(transformMongoDocument)
+        // privileges: role.privileges.map(transformMongoDocument)
       } as RoleResponse;
     });
   }
@@ -92,7 +72,7 @@ export class RolesService {
     const transformedRole = transformMongoDocument(role);
     return {
       ...transformedRole,
-      privileges: role.privileges.map(transformMongoDocument)
+      // privileges: role.privileges.map(transformMongoDocument)
     } as RoleResponse;
   }
 
@@ -114,13 +94,13 @@ export class RolesService {
     }
 
     // Validate privileges
-    const privileges = await this.privilegeModel.find({
-      _id: { $in: updateRoleDto.privileges },
-    });
+    // const privileges = await this.privilegeModel.find({
+    //   _id: { $in: updateRoleDto.privileges },
+    // });
 
-    if (privileges.length !== updateRoleDto.privileges.length) {
-      throw new BadRequestException(RoleMessages.INVALID_PRIVILEGE);
-    }
+    // if (privileges.length !== updateRoleDto.privileges.length) {
+    //   throw new BadRequestException(RoleMessages.INVALID_PRIVILEGE);
+    // }
 
     const role = await this.roleModel
       .findByIdAndUpdate(id, updateRoleDto, { new: true })
@@ -128,16 +108,19 @@ export class RolesService {
       .lean();
 
     const transformedRole = transformMongoDocument(role);
+    if (!role) {
+      throw new NotFoundException(RoleMessages.ROLE_NOT_FOUND);
+    }
     return { 
       role: {
         ...transformedRole,
-        privileges: role.privileges.map(transformMongoDocument)
+        // privileges: role.privileges.map(transformMongoDocument)
       } as RoleResponse, 
       message: RoleMessages.ROLE_UPDATED_SUCCESS 
     };
   }
 
-  async deleteRole(id: string, userId: string): Promise<{ message: string }> {
+  async deleteRole(id: string): Promise<{ message: string }> {
     // Önce rolü bul ve erişim kontrolü yap
     const role = await this.roleModel.findById(id);
     if (!role) {
@@ -147,11 +130,6 @@ export class RolesService {
     // Default rolleri silmeyi engelle
     if (this.DEFAULT_ROLES.includes(role.name)) {
       throw new BadRequestException('Default roller silinemez');
-    }
-
-    // Sadece rolü oluşturan kullanıcı silebilir
-    if (role.createdBy?.toString() !== userId) {
-      throw new BadRequestException('Bu rolü silme yetkiniz yok');
     }
 
     // Check if role is in use

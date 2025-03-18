@@ -3,38 +3,22 @@ import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiSecurity } from '
 import { RolesService } from './roles.service';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { RequirePrivileges } from '../auth/decorators/privileges.decorator';
 import { RoleMessages } from '../common/enums/messages.enum';
-import { PrivilegeResponse, RoleResponse, CreateRoleResponse, UpdateRoleResponse, DeleteRoleResponse } from './models/role.response';
+import { RoleResponse, CreateRoleResponse, UpdateRoleResponse, DeleteRoleResponse } from './models/role.response';
+import { Roles } from 'src/common/decorators/roles.decorator';
+import { RoleGuard } from 'src/common/guards/role.guard';
 
 @ApiTags('Roles')
 @ApiBearerAuth()
 @ApiSecurity('JWT-auth')
 @Controller('roles')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RoleGuard)
 export class RolesController {
   constructor(private readonly rolesService: RolesService) {}
 
-  // Privilege endpoints
-  @Get('privileges')
-  @RequirePrivileges('READ_PRIVILEGES')
-  @ApiOperation({ 
-    summary: 'Get all privileges',
-    description: 'Returns a list of all available privileges with their IDs, names, descriptions, resources, and actions'
-  })
-  @ApiResponse({ 
-    status: 200, 
-    description: 'List of all privileges',
-    type: [PrivilegeResponse]
-  })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
-  findAllPrivileges() {
-    return this.rolesService.findAllPrivileges();
-  }
-
   // Role endpoints
   @Post()
-  @RequirePrivileges('CREATE_ROLE')
+  @Roles('ADMIN')
   @ApiOperation({ 
     summary: 'Create new role',
     description: 'Creates a new role with the specified name, description, and privileges'
@@ -52,7 +36,6 @@ export class RolesController {
   }
 
   @Get()
-  @RequirePrivileges('READ_ROLES')
   @ApiOperation({ 
     summary: 'Get all roles',
     description: 'Returns a list of all roles with their privileges'
@@ -68,7 +51,6 @@ export class RolesController {
   }
 
   @Get(':id')
-  @RequirePrivileges('READ_ROLES')
   @ApiOperation({ 
     summary: 'Get role by id',
     description: 'Returns a single role with its privileges'
@@ -85,7 +67,6 @@ export class RolesController {
   }
 
   @Put(':id')
-  @RequirePrivileges('UPDATE_ROLE')
   @ApiOperation({ 
     summary: 'Update role',
     description: 'Updates an existing role with new name, description, or privileges'
@@ -103,7 +84,7 @@ export class RolesController {
   }
 
   @Delete(':id')
-  @RequirePrivileges('DELETE_ROLE')
+  @Roles('ADMIN')
   @ApiOperation({ 
     summary: 'Delete role',
     description: 'Deletes an existing role if it is not in use'
@@ -117,7 +98,7 @@ export class RolesController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: RoleMessages.ROLE_NOT_FOUND })
   @ApiResponse({ status: 409, description: RoleMessages.ROLE_IN_USE })
-  deleteRole(@Request() req, @Param('id') id: string) {
-    return this.rolesService.deleteRole(id, req.user.id);
+  deleteRole(@Param('id') id: string) {
+    return this.rolesService.deleteRole(id);
   }
 } 

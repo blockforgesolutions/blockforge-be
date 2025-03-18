@@ -14,15 +14,15 @@ import { ResetPasswordDto } from './dto/reset-password.dto';
 @ApiTags('Authentication')
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(private readonly authService: AuthService) { }
 
   @Post('signup')
-  @ApiOperation({ 
+  @ApiOperation({
     summary: 'Register a new user',
     description: 'Creates a new user account and sends a verification email'
   })
-  @ApiResponse({ 
-    status: 201, 
+  @ApiResponse({
+    status: 201,
     description: AuthMessages.USER_CREATED_SUCCESS,
     type: AuthResponse
   })
@@ -36,12 +36,12 @@ export class AuthController {
   }
 
   @Get('verify-email/:token')
-  @ApiOperation({ 
+  @ApiOperation({
     summary: 'Verify email address',
     description: 'Verifies a user\'s email address using the token sent to their email'
   })
-  @ApiResponse({ 
-    status: 200, 
+  @ApiResponse({
+    status: 200,
     description: AuthMessages.EMAIL_VERIFIED_SUCCESS,
     schema: {
       oneOf: [
@@ -70,12 +70,12 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
   @ApiBearerAuth()
-  @ApiOperation({ 
+  @ApiOperation({
     summary: 'Resend verification email',
     description: 'Resends the verification email to the user\'s email address. Requires authentication.'
   })
-  @ApiResponse({ 
-    status: 200, 
+  @ApiResponse({
+    status: 200,
     description: AuthMessages.VERIFICATION_EMAIL_SENT,
     schema: {
       properties: {
@@ -91,12 +91,12 @@ export class AuthController {
 
   @Post('signin')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ 
+  @ApiOperation({
     summary: 'Sign in with email and password',
     description: 'Authenticates a user using their email and password'
   })
-  @ApiResponse({ 
-    status: 200, 
+  @ApiResponse({
+    status: 200,
     description: AuthMessages.LOGIN_SUCCESS,
     type: AuthResponse
   })
@@ -128,12 +128,12 @@ export class AuthController {
 
   @Post('social')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ 
+  @ApiOperation({
     summary: 'Sign in with Google',
     description: 'Authenticates a user using their Google account. Creates a new user account if the email is not registered. The user information (email, name, etc.) will be extracted from the Google ID token.'
   })
-  @ApiResponse({ 
-    status: 200, 
+  @ApiResponse({
+    status: 200,
     description: AuthMessages.LOGIN_SUCCESS,
     type: AuthResponse
   })
@@ -150,12 +150,12 @@ export class AuthController {
   @Post('change-password')
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ 
+  @ApiOperation({
     summary: 'Change password',
     description: 'Changes the password for the authenticated user. Only works for local accounts (not social login).'
   })
-  @ApiResponse({ 
-    status: 200, 
+  @ApiResponse({
+    status: 200,
     description: AuthMessages.PASSWORD_CHANGED_SUCCESS,
     schema: {
       properties: {

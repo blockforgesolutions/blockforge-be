@@ -1,7 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
-import { Role } from '../roles/role.schema';
-import { Company } from '../company/company.schema';
+import { Role } from 'src/roles/role.schema';
 
 export enum AuthProvider {
   LOCAL = 'LOCAL',
@@ -27,9 +26,6 @@ export class User extends Document {
 
   @Prop({ type: Types.ObjectId, ref: 'Role' })
   role: Role;
-
-  @Prop({ type: Types.ObjectId, ref: 'Company' })
-  company?: Types.ObjectId;
 
   @Prop({ type: String, enum: AuthProvider, required: true })
   provider: AuthProvider;
@@ -58,9 +54,6 @@ export class User extends Document {
   @Prop({ default: true })
   isActive: boolean;
 
-  // Timestamps
-  createdAt: Date;
-  updatedAt: Date;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User); 

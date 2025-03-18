@@ -26,9 +26,6 @@ export class RoleResponse {
 
   @ApiProperty({ example: 'Firma Yöneticisi' })
   description: string;
-
-  @ApiProperty({ type: [PrivilegeResponse] })
-  privileges: PrivilegeResponse[];
 }
 
 export class CreateRoleResponse {
