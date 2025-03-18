@@ -19,21 +19,21 @@ export class PrivilegeService {
     return createdPrivilege.save();
   }
 
-  async findByName(name: string): Promise<Privilege> {
-    return this.privilegeModel.findOne({ name }).exec();
+  async findByName(name: string): Promise<Privilege | null> {
+    return await this.privilegeModel.findOne({ name }).exec();
   }
 
   async findAll(): Promise<Privilege[]> {
     return this.privilegeModel.find().exec();
   }
 
-  async update(id: string, updatePrivilegeDto: Partial<Privilege>): Promise<Privilege> {
-    return this.privilegeModel
+  async update(id: string, updatePrivilegeDto: Partial<Privilege>): Promise<Privilege | null> {
+    return await this.privilegeModel
       .findByIdAndUpdate(id, updatePrivilegeDto, { new: true })
       .exec();
   }
 
-  async delete(id: string): Promise<Privilege> {
-    return this.privilegeModel.findByIdAndDelete(id).exec();
+  async delete(id: string): Promise<Privilege | null> {
+    return await this.privilegeModel.findByIdAndDelete(id).exec();
   }
 } 

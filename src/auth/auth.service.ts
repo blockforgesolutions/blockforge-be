@@ -6,7 +6,7 @@ import * as bcrypt from 'bcrypt';
 import { randomBytes } from 'crypto';
 import { OAuth2Client } from 'google-auth-library';
 import { ConfigService } from '@nestjs/config';
-import { User } from '../user/user.schema';
+import { AuthProvider, User } from '../user/user.schema';
 import { CreateUserDto } from '../user/dto/create-user.dto';
 import { SocialUserDto } from '../user/dto/social-user.dto';
 import { ChangePasswordDto } from '../user/dto/change-password.dto';
@@ -15,12 +15,9 @@ import { MailService } from '../mail/mail.service';
 import { AuthResponse } from './models/auth.response';
 import { AuthMessages, MailMessages } from '../common/enums/messages.enum';
 import { Role } from '../roles/role.schema';
-import { Privilege } from '../roles/privilege.schema';
-import { transformMongoDocument } from '../common/utils/mongo.utils';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { PasswordReset } from './password-reset.schema';
-import { EmployeeInvitation, InvitationStatus } from '../employee/schemas/employee-invitation.schema';
 
 @Injectable()
 export class AuthService {
@@ -31,7 +28,6 @@ export class AuthService {
     @InjectModel(Role.name) private roleModel: Model<Role>,
     @InjectModel(EmailVerification.name) private emailVerificationModel: Model<EmailVerification>,
     @InjectModel(PasswordReset.name) private passwordResetModel: Model<PasswordReset>,
-    @InjectModel(EmployeeInvitation.name) private employeeInvitationModel: Model<EmployeeInvitation>,
     private jwtService: JwtService,
     private configService: ConfigService,
     private mailService: MailService,
@@ -41,7 +37,7 @@ export class AuthService {
     );
   }
 
-  private async generateVerificationToken(): Promise<string> {
+  private generateVerificationToken(): string {
     return randomBytes(32).toString('hex');
   }
 
@@ -71,52 +67,26 @@ export class AuthService {
     }
 
     const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
-    
-    let role;
-    let company;
-
-    // Check if there's an invitation token
-    if (createUserDto.token) {
-      const invitation = await this.employeeInvitationModel.findOne({ 
-        token: createUserDto.token,
-        email: createUserDto.email,
-        status: InvitationStatus.PENDING,
-        expiresAt: { $gt: new Date() }
-      }).populate('roleId');
-
-      if (!invitation) {
-        throw new BadRequestException('Invalid or expired invitation token');
-      }
-
-      role = invitation.roleId;
-      company = invitation.company;
-
-      // Mark invitation as accepted
-      invitation.status = InvitationStatus.ACCEPTED;
-      await invitation.save();
-    } else {
-      role = await this.getManagerRole();
-    }
 
     const user = await this.userModel.create({
       ...createUserDto,
       password: hashedPassword,
       provider: 'LOCAL',
-      role: new Types.ObjectId(role._id),
-      company: company ? new Types.ObjectId(company) : undefined,
     });
 
     // Generate and save verification token
-    const token = await this.generateVerificationToken();
+    const token = this.generateVerificationToken();
+
     await this.emailVerificationModel.create({
       userId: user._id,
       token,
     });
 
-    // Send verification email
-    await this.mailService.sendVerificationEmail(user, token);
 
-    return this.mapToUserResponse(user);
+    // Send verification email
+    // await this.mailService.sendVerificationEmail(user, token);
+    const newUser = await this.mapToUserResponse(user);
+    return newUser
   }
 
   async verifyEmail(token: string): Promise<AuthResponse | { message: string }> {
@@ -159,7 +129,7 @@ export class AuthService {
       return { message: AuthMessages.EMAIL_ALREADY_VERIFIED };
     }
 
-    if (user.provider !== 'LOCAL') {
+    if (user.provider !== AuthProvider.LOCAL) {
       throw new BadRequestException(AuthMessages.CANNOT_VERIFY_EMAIL_FOR_PROVIDER.replace('{provider}', user.provider));
     }
 
@@ -168,7 +138,7 @@ export class AuthService {
       await this.emailVerificationModel.deleteMany({ userId: user._id });
 
       // Generate and save new verification token
-      const token = await this.generateVerificationToken();
+      const token = this.generateVerificationToken();
       await this.emailVerificationModel.create({
         userId: user._id,
         token,
@@ -190,11 +160,8 @@ export class AuthService {
       .populate({
         path: 'role',
         select: '_id name description',
-        populate: {
-          path: 'privileges',
-          select: '_id name description resource action'
-        }
       });
+
 
     if (!user) {
       throw new UnauthorizedException(AuthMessages.INVALID_CREDENTIALS);
@@ -205,7 +172,7 @@ export class AuthService {
       throw new UnauthorizedException(AuthMessages.ACCOUNT_DEACTIVATED);
     }
 
-    if (user.provider !== 'LOCAL') {
+    if (user.provider !== AuthProvider.LOCAL) {
       throw new UnauthorizedException(AuthMessages.SIGN_IN_WITH_PROVIDER.replace('{provider}', user.provider));
     }
 
@@ -257,7 +224,7 @@ export class AuthService {
         user.surname = surname;
         user.picture = picture;
         await user.save();
-        
+
         // Re-populate after save
         user = await user.populate({
           path: 'role',
@@ -273,27 +240,27 @@ export class AuthService {
 
         // Check if there's an invitation token
         if (socialUserDto.token) {
-          const invitation = await this.employeeInvitationModel.findOne({ 
-            token: socialUserDto.token,
-            email: email,
-            status: InvitationStatus.PENDING,
-            expiresAt: { $gt: new Date() }
-          });
+          // const invitation = await this.employeeInvitationModel.findOne({ 
+          //   token: socialUserDto.token,
+          //   email: email,
+          //   status: InvitationStatus.PENDING,
+          //   expiresAt: { $gt: new Date() }
+          // });
 
-          if (!invitation) {
-            throw new BadRequestException('Invalid or expired invitation token');
-          }
+          // if (!invitation) {
+          //   throw new BadRequestException('Invalid or expired invitation token');
+          // }
 
-          role = await this.getEmployeeRole();
-          company = invitation.company;
+          // role = await this.getEmployeeRole();
+          // company = invitation.company;
 
-          // Mark invitation as accepted
-          invitation.status = InvitationStatus.ACCEPTED;
-          await invitation.save();
+          // // Mark invitation as accepted
+          // invitation.status = InvitationStatus.ACCEPTED;
+          // await invitation.save();
         } else {
           role = await this.getManagerRole();
         }
-        
+
         user = await this.userModel.create({
           email,
           name: firstName,
@@ -327,19 +294,19 @@ export class AuthService {
   }
 
   private async mapToUserResponse(user: User): Promise<AuthResponse> {
-    const token = this.jwtService.sign({ sub: user._id });
+    const jwtPayload = {
+      sub: user._id
+    };
+
+    const token = await this.jwtService.signAsync(jwtPayload);
 
     // Populate role and privileges
     const populatedUser = await this.userModel
       .findById(user._id)
       .select('-password')
-      .populate<{ role: Role & { privileges: Privilege[] } }>({
+      .populate({
         path: 'role',
-        select: '_id name description',
-        populate: {
-          path: 'privileges',
-          select: '_id name description resource action'
-        }
+        select: '_id name description'
       })
       .lean();
 
@@ -347,46 +314,17 @@ export class AuthService {
       throw new NotFoundException(AuthMessages.USER_OR_ROLE_NOT_FOUND);
     }
 
-    const transformedUser = transformMongoDocument(populatedUser);
-    const transformedRole = transformMongoDocument(populatedUser.role);
-
-    if (!transformedUser || !transformedRole) {
-      throw new InternalServerErrorException(AuthMessages.ERROR_TRANSFORMING_USER_DATA);
-    }
-
-    const transformedPrivileges = populatedUser.role.privileges
-      .map(privilege => {
-        const transformed = transformMongoDocument(privilege);
-        return transformed ? transformed.name : null;
-      })
-      .filter((name): name is string => name !== null);
-
     const response: AuthResponse = {
       access_token: token,
       user: {
-        ...transformedUser,
-        role: transformedRole.name,
-        privileges: transformedPrivileges
+        ...populatedUser,
+        // eslint-disable-next-line @typescript-eslint/no-base-to-string
+        _id: String(populatedUser._id),
+        role: populatedUser.role.name
       }
     };
 
     return response;
-  }
-
-  private getRolePrivileges(role: string): string[] {
-    switch (role) {
-      case 'ADMIN':
-        return [
-          'READ_PROFILE',
-          'UPDATE_PROFILE',
-          'DELETE_PROFILE',
-          'MANAGE_USERS',
-          'MANAGE_ROLES',
-        ];
-      case 'USER':
-      default:
-        return ['READ_PROFILE', 'UPDATE_PROFILE'];
-    }
   }
 
   async changePassword(userId: string, changePasswordDto: ChangePasswordDto) {
@@ -395,7 +333,7 @@ export class AuthService {
       throw new BadRequestException(AuthMessages.USER_NOT_FOUND);
     }
 
-    if (user.provider !== 'LOCAL') {
+    if (user.provider !== AuthProvider.LOCAL) {
       throw new BadRequestException(AuthMessages.CANNOT_CHANGE_PASSWORD_FOR_PROVIDER.replace('{provider}', user.provider));
     }
 
@@ -413,7 +351,7 @@ export class AuthService {
 
     // Hash new password
     const hashedPassword = await bcrypt.hash(changePasswordDto.newPassword, 10);
-    
+
     // Update password
     user.password = hashedPassword;
     await user.save();
@@ -425,7 +363,7 @@ export class AuthService {
     return randomBytes(length / 2).toString('hex');
   }
 
-  private async generateResetToken(): Promise<string> {
+  private generateResetToken(): string {
     return randomBytes(32).toString('hex');
   }
 
@@ -435,12 +373,12 @@ export class AuthService {
       throw new NotFoundException(AuthMessages.USER_NOT_FOUND);
     }
 
-    if (user.provider !== 'LOCAL') {
+    if (user.provider !== AuthProvider.LOCAL) {
       throw new BadRequestException(AuthMessages.CANNOT_RESET_PASSWORD_FOR_PROVIDER.replace('{provider}', user.provider));
     }
 
     // Generate reset token
-    const token = await this.generateResetToken();
+    const token = this.generateResetToken();
 
     // Delete any existing reset tokens for this user
     await this.passwordResetModel.deleteMany({ userId: user._id });
@@ -466,6 +404,8 @@ export class AuthService {
 
       return { valid: true };
     } catch (error) {
+      console.log(error);
+
       throw new UnauthorizedException(AuthMessages.INVALID_RESET_TOKEN);
     }
   }
@@ -496,7 +436,7 @@ export class AuthService {
 
       // Hash and update password
       const hashedPassword = await bcrypt.hash(password, 10);
-      await this.userModel.findByIdAndUpdate(user._id, { 
+      await this.userModel.findByIdAndUpdate(user._id, {
         password: hashedPassword,
         activeSessions: [] // Invalidate all active sessions
       });

@@ -6,16 +6,24 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { CourseModule } from './course/course.module';
 import { LessonModule } from './lesson/lesson.module';
 import { ProgressModule } from './progress/progress.module';
+import { AuthModule } from './auth/auth.module';
+import { UserModule } from './user/user.module';
+import { RolesModule } from './roles/roles.module';
+import { MailModule } from './mail/mail.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
-      envFilePath: `.env.${process.env.NODE_ENV || 'development'}`,
+      envFilePath: `.env.${'development.local'}`,
       isGlobal: true
     }),
     MongooseModule.forRoot(process.env.MONGO_URL!, {
       dbName: 'dashboard'
     }),
+    AuthModule,
+    UserModule,
+    RolesModule,
+    MailModule,
     CourseModule,
     LessonModule,
     ProgressModule,

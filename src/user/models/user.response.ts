@@ -19,12 +19,6 @@ export class CurrentUserResponse {
   @ApiProperty({ example: 'MANAGER' })
   role: string;
 
-  @ApiProperty({ 
-    type: [String], 
-    example: ['READ_USERS', 'CREATE_ROLE'] 
-  })
-  privileges: string[];
-
   @ApiProperty({ example: 'LOCAL', enum: ['LOCAL', 'GOOGLE'] })
   provider: string;
 
