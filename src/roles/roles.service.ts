@@ -2,12 +2,11 @@ import { Injectable, NotFoundException, ConflictException, BadRequestException }
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Role } from './role.schema';
-import { Privilege } from './privilege.schema';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { RoleMessages } from '../common/enums/messages.enum';
 import { User } from '../user/user.schema';
 import { transformMongoDocument } from '../common/utils/mongo.utils';
-import { PrivilegeResponse, RoleResponse, CreateRoleResponse, UpdateRoleResponse } from './models/role.response';
+import { RoleResponse, CreateRoleResponse, UpdateRoleResponse } from './models/role.response';
 
 @Injectable()
 export class RolesService {
@@ -15,15 +14,9 @@ export class RolesService {
 
   constructor(
     @InjectModel(Role.name) private roleModel: Model<Role>,
-    @InjectModel(Privilege.name) private privilegeModel: Model<Privilege>,
     @InjectModel(User.name) private userModel: Model<User>,
   ) {}
 
-  // Privilege operations
-  async findAllPrivileges(): Promise<PrivilegeResponse[] | []> {
-    const privileges = await this.privilegeModel.find().lean();
-    return privileges.map(transformMongoDocument).filter((privilege) => privilege !== null);
-  }
 
   // Role operations
   async createRole(createRoleDto: CreateRoleDto, userId: string): Promise<CreateRoleResponse> {
