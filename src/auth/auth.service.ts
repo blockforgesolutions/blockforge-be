@@ -68,9 +68,12 @@ export class AuthService {
 
     const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
 
+    const role = await this.roleModel.findOne({ name: "USER" });
+
     const user = await this.userModel.create({
       ...createUserDto,
       password: hashedPassword,
+      role: role?._id,
       provider: 'LOCAL',
     });
 
