@@ -39,6 +39,10 @@ export class CreateUserDto {
   @IsString()
   surname: string;
 
+  @IsOptional()
+  @IsString()
+  role:string
+
   @ApiPropertyOptional({
     description: 'Employee invitation token',
     example: '1234567890abcdef',
