@@ -1,5 +1,5 @@
-import { Controller, Post, Body, UseGuards, Get, Param, HttpCode, HttpStatus, Query } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
+import { Controller, Post, Body, UseGuards, Get, HttpCode, HttpStatus, Query } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from '../user/dto/create-user.dto';
 import { SocialUserDto } from '../user/dto/social-user.dto';
@@ -35,7 +35,7 @@ export class AuthController {
     return this.authService.signup(createUserDto);
   }
 
-  @Get('verify-email/:token')
+  @Get('verify-email')
   @ApiOperation({
     summary: 'Verify email address',
     description: 'Verifies a user\'s email address using the token sent to their email'
@@ -56,13 +56,13 @@ export class AuthController {
     }
   })
   @ApiResponse({ status: 400, description: AuthMessages.INVALID_VERIFICATION_TOKEN })
-  @ApiParam({
+  @ApiQuery({
     name: 'token',
     required: true,
     description: 'Email verification token sent to user\'s email',
     type: 'string'
   })
-  async verifyEmail(@Param('token') token: string): Promise<AuthResponse | { message: string }> {
+  async verifyEmail(@Query('token') token: string): Promise<AuthResponse | { message: string }> {
     return this.authService.verifyEmail(token);
   }
 

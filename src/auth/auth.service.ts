@@ -87,7 +87,10 @@ export class AuthService {
 
 
     // Send verification email
-    // await this.mailService.sendVerificationEmail(user, token);
+    const email = await this.mailService.sendVerificationEmail(user, token);
+    if (!email) {
+      throw new InternalServerErrorException("Email send failed");
+    }
     const newUser = await this.mapToUserResponse(user);
     return newUser
   }
@@ -321,7 +324,6 @@ export class AuthService {
       access_token: token,
       user: {
         ...populatedUser,
-        // eslint-disable-next-line @typescript-eslint/no-base-to-string
         _id: String(populatedUser._id),
         role: populatedUser.role.name
       }

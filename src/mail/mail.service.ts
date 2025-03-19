@@ -9,22 +9,38 @@ import { MailMessages } from '../common/enums/messages.enum';
 
 @Injectable()
 export class MailService {
-  private readonly oauth2Client: OAuth2Client;
-  private readonly gmail: any;
+  private oauth2Client: OAuth2Client;
+  private gmail: any;
 
   constructor(private configService: ConfigService) {
+    this.initializeOAuthClient();
+  }
+
+  private initializeOAuthClient() {
+    const clientId = this.configService.get('GOOGLE_CLIENT_ID');
+    const clientSecret = this.configService.get('GOOGLE_CLIENT_SECRET');
+    const refreshToken = this.configService.get('GOOGLE_REFRESH_TOKEN');
+
+    if (!clientId || !clientSecret || !refreshToken) {
+      throw new Error('Eksik Google OAuth konfigürasyonu');
+    }
+
     this.oauth2Client = new OAuth2Client({
-      clientId: this.configService.get('GOOGLE_CLIENT_ID'),
-      clientSecret: this.configService.get('GOOGLE_CLIENT_SECRET'),
+      clientId,
+      clientSecret,
       redirectUri: 'http://localhost:8080/mail/callback',
     });
 
-    // Set credentials using refresh token
     this.oauth2Client.setCredentials({
-      refresh_token: this.configService.get('GOOGLE_REFRESH_TOKEN'),
+      refresh_token: refreshToken,
     });
 
-    // Initialize Gmail API
+    this.oauth2Client.on('tokens', (tokens) => {
+      if (tokens.refresh_token) {
+        this.configService.set('GOOGLE_REFRESH_TOKEN', tokens.refresh_token);
+      }
+    });
+ 
     this.gmail = google.gmail({ version: 'v1', auth: this.oauth2Client });
   }
 
@@ -33,6 +49,8 @@ export class MailService {
       const templatePath = path.join(process.cwd(), 'src', 'resources', 'email-templates', `${templateName}.html`);
       return fs.promises.readFile(templatePath, 'utf8');
     } catch (error) {
+      console.log(error);
+
       throw new BadRequestException(MailMessages.TEMPLATE_NOT_FOUND);
     }
   }
@@ -43,6 +61,8 @@ export class MailService {
         return result.replace(new RegExp(`{{${key}}}`, 'g'), value);
       }, template);
     } catch (error) {
+      console.log(error);
+
       throw new BadRequestException(MailMessages.TEMPLATE_RENDERING_ERROR);
     }
   }
@@ -54,7 +74,7 @@ export class MailService {
 
     // Subject'i base64 ile encode et
     const encodedSubject = Buffer.from(message.subject).toString('base64');
-    
+
     const str = [
       'Content-Type: text/html; charset=utf-8',
       'MIME-Version: 1.0',
@@ -82,6 +102,11 @@ export class MailService {
     const encodedMessage = this.encodeMessage(message);
 
     try {
+      const { token } = await this.oauth2Client.getAccessToken();
+      if (!token) {
+        throw new Error('Access token alınamadı');
+      }
+
       await this.gmail.users.messages.send({
         userId: 'me',
         requestBody: {
@@ -97,7 +122,7 @@ export class MailService {
 
   async sendVerificationEmail(user: User, token: string): Promise<{ message: string }> {
     const verificationUrl = `${this.configService.get('EMAIL_VERIFICATION_URL')}?token=${token}`;
-    
+
     const template = await this.loadTemplate('verification');
     const html = this.replaceTemplateVariables(template, {
       name: user.name,
@@ -121,6 +146,8 @@ export class MailService {
         prompt: 'consent',
       });
     } catch (error) {
+      console.log(error);
+
       throw new InternalServerErrorException(MailMessages.SMTP_CONNECTION_ERROR);
     }
   }
@@ -131,6 +158,8 @@ export class MailService {
       const { tokens } = await this.oauth2Client.getToken(code);
       return tokens;
     } catch (error) {
+      console.log(error);
+
       throw new InternalServerErrorException(MailMessages.SMTP_CONNECTION_ERROR);
     }
   }
