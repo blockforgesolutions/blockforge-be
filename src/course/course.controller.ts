@@ -85,6 +85,7 @@ export class CourseController {
     @ApiResponse({ status: 400, description: CourseMessages.INVALID_CREDENTIALS })
     @ApiResponse({ status: 401, description: CourseMessages.UNAUTHORIZED_ACCESS })
     @ApiResponse({ status: 403, description: CourseMessages.UNAUTHORIZED_ACCESS })
+    @ApiResponse({ status: 404, description: CourseMessages.NOT_FOUND })
     async updateCourse(@Param('courseId') courseId: string, @Body() course: UpdateCourseDto) {
         const updatedCourse = await this.courseService.updateCourse(courseId, course);
         return new ApiResponseDto(true, updatedCourse);
