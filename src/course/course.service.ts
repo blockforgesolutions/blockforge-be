@@ -5,6 +5,9 @@ import { Model } from 'mongoose';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { ErrorResponseDto } from 'src/common/dto/error-response.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
+import { transformMongoArray } from 'src/common/utils/mongo.utils';
+import { CourseResponse } from './model/course.response';
+import { transformMongoData } from 'src/common/utils/transform.utils';
 
 @Injectable()
 export class CourseService {
@@ -12,34 +15,47 @@ export class CourseService {
         @InjectModel(CourseModel.name) private courseModel: Model<CourseModel>
     ) { }
 
-    async createCourse(course: CreateCourseDto): Promise<CourseModel> {
-        const newCourse = new this.courseModel(course).save();
-        return newCourse;
+    async createCourse(course: CreateCourseDto): Promise<CourseResponse> {
+        const newCourse = await this.courseModel.create(course);
+
+        const transformedCourse = transformMongoData(newCourse.toObject(), CourseResponse);
+
+        return transformedCourse;
     }
 
-    async getCourses(): Promise<CourseModel[]> {
-        return this.courseModel.find().exec();
+    async getCourses(): Promise<CourseResponse[]> {
+        const transformedCourses = transformMongoArray(await this.courseModel.find().lean());
+        if (!transformedCourses) {
+            throw new HttpException(new ErrorResponseDto('Failed to transform course document'), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        return transformedCourses;
     }
 
-    async getCourseById(courseId: string): Promise<CourseModel> {
-        const course = await this.courseModel.findById(courseId).exec();
+    async getCourseById(courseId: string): Promise<CourseResponse> {
+        const course = await this.courseModel.findById(courseId).lean();
 
         if (!course) {
             throw new HttpException(new ErrorResponseDto('Course not found'), HttpStatus.NOT_FOUND);
         }
-        return course;
+
+        const transformedCourse = transformMongoData(course, CourseResponse);
+
+        return transformedCourse;
     }
 
-    async updateCourse(courseId: string, course: UpdateCourseDto): Promise<CourseModel> {
-        const updatedCourse = await this.courseModel.findByIdAndUpdate(courseId, course, { new: true }).exec();
+    async updateCourse(courseId: string, course: UpdateCourseDto): Promise<CourseResponse> {
+        const updatedCourse = await this.courseModel.findByIdAndUpdate(courseId, course, { new: true }).lean();
 
         if (!updatedCourse) {
             throw new HttpException(new ErrorResponseDto('Course not found'), HttpStatus.NOT_FOUND);
         }
-        return updatedCourse;
+
+        const transformedCourse = transformMongoData(updatedCourse, CourseResponse);
+        return transformedCourse;
     }
 
-    async deleteCourse(courseId: string) {
+    async deleteCourse(courseId: string): Promise<any> {
         const deletedCourse = await this.courseModel.findByIdAndDelete(courseId).exec();
 
         if (!deletedCourse) {

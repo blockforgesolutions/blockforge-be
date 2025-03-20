@@ -20,6 +20,12 @@ export class LessonModel extends Document implements Lesson {
 
     @Prop()
     quiz?: [string];
+
+    @Prop()
+    createdAt: Date;
+
+    @Prop()
+    updatedAt: Date;
 }
 
 export const LessonSchema = SchemaFactory.createForClass(LessonModel);

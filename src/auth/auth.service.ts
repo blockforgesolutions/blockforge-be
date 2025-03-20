@@ -18,6 +18,7 @@ import { Role } from '../roles/role.schema';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { PasswordReset } from './password-reset.schema';
+import { transformMongoDocument } from 'src/common/utils/mongo.utils';
 
 @Injectable()
 export class AuthService {
@@ -320,12 +321,19 @@ export class AuthService {
       throw new NotFoundException(AuthMessages.USER_OR_ROLE_NOT_FOUND);
     }
 
+    const transformedUser = transformMongoDocument(populatedUser);
+    const transformedRole = transformMongoDocument(populatedUser.role);
+
+    if(!transformedUser || !transformedRole) {
+      throw new Error('Failed to transform user document');
+    }
+
     const response: AuthResponse = {
       access_token: token,
       user: {
-        ...populatedUser,
-        _id: String(populatedUser._id),
-        role: populatedUser.role.name
+        ...transformedUser,
+        id: transformedUser.id.toString(),
+        role: transformedRole.name
       }
     };
 

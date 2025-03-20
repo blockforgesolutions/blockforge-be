@@ -17,6 +17,12 @@ export class CourseModel extends Document implements Course {
 
     @Prop({ type: Types.ObjectId, ref: 'User', required: true })
     instructor: Types.ObjectId;
+
+    @Prop()
+    createdAt: Date;
+
+    @Prop()
+    updatedAt: Date;
 }
 
 export const CourseSchema = SchemaFactory.createForClass(CourseModel);
