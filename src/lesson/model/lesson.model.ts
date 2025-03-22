@@ -12,8 +12,8 @@ export class LessonModel extends Document implements Lesson {
     @Prop({ required: true })
     content: string;
 
-    @Prop({ type: Types.ObjectId, ref: 'Course', required: true })
-    course: Types.ObjectId;
+    @Prop({ type: Types.ObjectId, ref: 'Module', required: true })
+    moduleId: Types.ObjectId;
 
     @Prop({ required: true })
     videoUrl: string;

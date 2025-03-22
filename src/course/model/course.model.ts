@@ -12,9 +12,6 @@ export class CourseModel extends Document implements Course {
     @Prop({ required: true })
     description: string;
 
-    @Prop({ required: true })
-    modules: [string];
-
     @Prop({ type: Types.ObjectId, ref: 'User', required: true })
     instructor: Types.ObjectId;
 

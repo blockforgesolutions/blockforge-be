@@ -12,7 +12,7 @@ export class LessonResponse {
     content: string
 
     @ApiProperty({ example: "Course id: 67daa8881f4c61f101046612" })
-    course: Types.ObjectId
+    moduleId: Types.ObjectId
 
     @ApiProperty({ example: "https://example.com/video.mp4" })
     videoUrl: string
