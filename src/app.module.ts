@@ -10,6 +10,7 @@ import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { RolesModule } from './roles/roles.module';
 import { MailModule } from './mail/mail.module';
+import { CertificateModule } from './certificate/certificate.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { MailModule } from './mail/mail.module';
     CourseModule,
     LessonModule,
     ProgressModule,
+    CertificateModule,
   ],
   controllers: [AppController],
   providers: [AppService],
