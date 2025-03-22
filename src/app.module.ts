@@ -11,6 +11,7 @@ import { UserModule } from './user/user.module';
 import { RolesModule } from './roles/roles.module';
 import { MailModule } from './mail/mail.module';
 import { CertificateModule } from './certificate/certificate.module';
+import { ModuleModule } from './module/module.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { CertificateModule } from './certificate/certificate.module';
     LessonModule,
     ProgressModule,
     CertificateModule,
+    ModuleModule,
   ],
   controllers: [AppController],
   providers: [AppService],
