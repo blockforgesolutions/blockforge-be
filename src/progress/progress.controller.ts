@@ -1,7 +1,6 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Put, UseGuards } from '@nestjs/common';
 import { ProgressService } from './progress.service';
 import { CreateProgressDto } from './dto/create-progress.dto';
-import { ApiResponseDto } from 'src/common/dto/response.dto';
 import { UpdateProgressDto } from './dto/update-progress.dto';
 import { ApiOperation, ApiParam, ApiResponse, ApiSecurity, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
@@ -28,9 +27,7 @@ export class ProgressController {
     @ApiResponse({ status: 401, description: ProgressMessages.UNAUTHORIZED_ACCESS })
     @ApiResponse({ status: 403, description: ProgressMessages.UNAUTHORIZED_ACCESS })
     async createProgress(@Body() progress: CreateProgressDto) {
-        const newProgress = await this.progressService.createProgress(progress);
-
-        return new ApiResponseDto(true, newProgress);
+        return await this.progressService.createProgress(progress);
     }
 
     @Get(':userId/:courseId')
@@ -45,8 +42,7 @@ export class ProgressController {
     @ApiResponse({ status: 404, description: ProgressMessages.NOT_FOUND })
 
     async getProgress(@Param('userId') userId: string, @Param('courseId') courseId: string) {
-        const progress = await this.progressService.getProgress(userId, courseId);
-        return new ApiResponseDto(true, progress);
+        return await this.progressService.getProgress(userId, courseId);
     }
 
     @Put(':userId/:courseId')
@@ -63,8 +59,7 @@ export class ProgressController {
     @ApiResponse({ status: 403, description: ProgressMessages.UNAUTHORIZED_ACCESS })
     @ApiResponse({ status: 404, description: ProgressMessages.NOT_FOUND })
     async updateProgress(@Param('userId') userId: string, @Param('courseId') courseId: string, @Body() progress: UpdateProgressDto) {
-        const updatedProgress = await this.progressService.updateProgress(userId, courseId, progress);
-        return new ApiResponseDto(true, updatedProgress);
+        return await this.progressService.updateProgress(userId, courseId, progress);
     }
 
     @Post('addLesson/:userId/:courseId/:lessonId')
@@ -82,8 +77,7 @@ export class ProgressController {
     @ApiResponse({ status: 403, description: ProgressMessages.UNAUTHORIZED_ACCESS })
     @ApiResponse({ status: 404, description: ProgressMessages.NOT_FOUND })
     async addLesson(@Param('userId') userId: string, @Param('courseId') courseId: string, @Param('lessonId') lessonId: string) {
-        const progress = await this.progressService.addLesson(userId, courseId, lessonId);
-        return new ApiResponseDto(true, progress);
+        return await this.progressService.addLesson(userId, courseId, lessonId);
     }
 
     @Patch('removeLesson/:userId/:courseId/:lessonId')
@@ -101,8 +95,7 @@ export class ProgressController {
     @ApiResponse({ status: 403, description: ProgressMessages.UNAUTHORIZED_ACCESS })
     @ApiResponse({ status: 404, description: ProgressMessages.NOT_FOUND })
     async removeLesson(@Param('userId') userId: string, @Param('courseId') courseId: string, @Param('lessonId') lessonId: string) {
-        const progress = await this.progressService.removeLesson(userId, courseId, lessonId);
-        return new ApiResponseDto(true, progress);
+        return await this.progressService.removeLesson(userId, courseId, lessonId);
     }
 
     @Delete(':userId/:courseId')
@@ -115,7 +108,6 @@ export class ProgressController {
     @ApiResponse({ status: 403, description: ProgressMessages.UNAUTHORIZED_ACCESS })
     @ApiResponse({ status: 404, description: ProgressMessages.NOT_FOUND })
     async deleteProgress(@Param('userId') userId: string, @Param('courseId') courseId: string) {
-        const progress = await this.progressService.deleteProgress(userId, courseId);
-        return new ApiResponseDto(true, progress);
+        return await this.progressService.deleteProgress(userId, courseId);
     }
 }

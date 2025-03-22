@@ -1,7 +1,6 @@
 import { Body, Controller, Delete, Get, Param, Post, Put, UseGuards } from '@nestjs/common';
 import { CourseService } from './course.service';
 import { CreateCourseDto } from './dto/create-course.dto';
-import { ApiResponseDto } from 'src/common/dto/response.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { RoleGuard } from 'src/common/guards/role.guard';
@@ -31,8 +30,7 @@ export class CourseController {
     @ApiResponse({ status: 401, description: CourseMessages.UNAUTHORIZED_ACCESS })
     @ApiResponse({ status: 403, description: CourseMessages.UNAUTHORIZED_ACCESS })
     async createCourse(@Body() course: CreateCourseDto) {
-        const newCourse = await this.courseService.createCourse(course);
-        return new ApiResponseDto(true, newCourse);
+        return await this.courseService.createCourse(course);
     }
 
     @Get()
@@ -43,8 +41,7 @@ export class CourseController {
         type: [CourseResponse]
     })
     async getCourses() {
-        const courses = await this.courseService.getCourses();
-        return new ApiResponseDto(true, courses);
+        return await this.courseService.getCourses();
     }
 
     @Get(':courseId')
@@ -60,8 +57,7 @@ export class CourseController {
     })
     @ApiResponse({ status: 404, description: CourseMessages.NOT_FOUND })
     async getCourseById(@Param('courseId') courseId: string) {
-        const course = await this.courseService.getCourseById(courseId);
-        return new ApiResponseDto(true, course);
+        return await this.courseService.getCourseById(courseId);
     }
 
     @Put(':courseId')
@@ -87,8 +83,7 @@ export class CourseController {
     @ApiResponse({ status: 403, description: CourseMessages.UNAUTHORIZED_ACCESS })
     @ApiResponse({ status: 404, description: CourseMessages.NOT_FOUND })
     async updateCourse(@Param('courseId') courseId: string, @Body() course: UpdateCourseDto) {
-        const updatedCourse = await this.courseService.updateCourse(courseId, course);
-        return new ApiResponseDto(true, updatedCourse);
+        return await this.courseService.updateCourse(courseId, course);
     }
 
     @Delete(':courseId')
@@ -108,7 +103,7 @@ export class CourseController {
     @ApiResponse({ status: 403, description: CourseMessages.UNAUTHORIZED_ACCESS })
     @ApiResponse({ status: 404, description: CourseMessages.NOT_FOUND })
     async deleteCourse(@Param('courseId') courseId: string) {
-        const deletedCourse = await this.courseService.deleteCourse(courseId);
-        return new ApiResponseDto(true, deletedCourse);
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+        return await this.courseService.deleteCourse(courseId);
     }
 }
