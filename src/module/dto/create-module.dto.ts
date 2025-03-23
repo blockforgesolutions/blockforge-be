@@ -10,5 +10,5 @@ export class CreateModuleDto {
     @ApiProperty({ example:'67daa8881f4c61f101046612'})
     @IsString()
     @IsNotEmpty()
-    readonly courseId: string
+    readonly course: string
 }

@@ -16,7 +16,7 @@ export class CreateLessonDto {
     @ApiProperty({ example: "Course id: 67daa8881f4c61f101046612" })
     @IsMongoId()
     @IsNotEmpty()
-    course: string
+    moduleId: string
 
     @ApiProperty({ example: "https://example.com/video.mp4" })
     @IsString()
