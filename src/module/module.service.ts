@@ -18,7 +18,7 @@ export class ModuleService {
     async createModule(createModuleDto: CreateModuleDto): Promise<ModuleResponse> {
         const module = await this.moduleModel.create(createModuleDto);
 
-        const transformedModule = transformMongoData(module, ModuleResponse);
+        const transformedModule = transformMongoData(module.toObject(), ModuleResponse);
 
         return transformedModule
     }

@@ -69,16 +69,16 @@ export class LessonController {
         return await this.lessonService.getLessonById(lessonId);
     }
 
-    @Get('getCourseLessons/:courseId')
-    @ApiOperation({ summary: 'Get all lessons by course id', description: 'Returns all lessons by course id' })
-    @ApiParam({ name: 'courseId', type: String, description: 'The id of the course' })
+    @Get('getModuleLessons/:moduleId')
+    @ApiOperation({ summary: 'Get all lessons by module id', description: 'Returns all lessons by module id' })
+    @ApiParam({ name: 'moduleId', type: String, description: 'The id of the module' })
     @ApiResponse({
         status: 200,
         description: "All lessons by course id",
         type: [LessonResponse]
     })
-    async getLessonsByCourseId(@Param('courseId') courseId: string) {
-        return await this.lessonService.getLessonsByCourseId(courseId);
+    async getLessonsByCourseId(@Param('moduleId') moduleId: string) {
+        return await this.lessonService.getLessonsByModuleId(moduleId);
     }
 
     @Put(':lessonId')

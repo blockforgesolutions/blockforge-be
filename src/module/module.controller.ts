@@ -11,7 +11,7 @@ import { UpdateModuleDto } from './dto/update-module.dto';
 
 @ApiTags('Module')
 @Controller('module')
-@UseGuards(JwtAuthGuard, RoleGuard)
+
 export class ModuleController {
     constructor(
         private readonly moduleService: ModuleService
@@ -20,6 +20,7 @@ export class ModuleController {
 
     @Post()
     @ApiSecurity('bearer')
+    @UseGuards(JwtAuthGuard, RoleGuard)
     @Roles("ADMIN", "INSTRUCTOR")
     @ApiOperation({ summary: 'Create Module', description: 'Returns the created module' })
     @ApiResponse({
@@ -49,7 +50,6 @@ export class ModuleController {
 
     @Get('course/:courseId')
     @ApiOperation({ summary: 'Get Module', description: 'Returns the module' })
-    @ApiParam({ name: 'moduleId', type: String })
     @ApiResponse({
         status: 200,
         description: "The Modules has been found",
@@ -60,6 +60,8 @@ export class ModuleController {
     }
 
     @Put(':moduleId')
+    @UseGuards(JwtAuthGuard, RoleGuard)
+    @Roles("ADMIN", "INSTRUCTOR")
     @ApiOperation({ summary: 'Update Module', description: 'Returns the updated module' })
     @ApiParam({ name: 'moduleId', type: String })
     @ApiResponse({
@@ -76,6 +78,8 @@ export class ModuleController {
     }
 
     @Delete(':moduleId')
+    @UseGuards(JwtAuthGuard, RoleGuard)
+    @Roles("ADMIN", "INSTRUCTOR")
     @ApiOperation({ summary: 'Delete Module', description: 'Returns the deleted module' })
     @ApiParam({ name: 'moduleId', type: String })
     @ApiResponse({

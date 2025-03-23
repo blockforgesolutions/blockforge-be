@@ -44,8 +44,8 @@ export class LessonService {
         return transformedLesson
     }
 
-    async getLessonsByCourseId(courseId: string): Promise<LessonResponse[]> {
-        const lessons = await this.lessonModel.find({ course: courseId }).lean();
+    async getLessonsByModuleId(moduleId: string): Promise<LessonResponse[]> {
+        const lessons = await this.lessonModel.find({ moduleId: moduleId }).lean();
 
         const transformedLessons = transformMongoArray(lessons);
         if (!transformedLessons) {
