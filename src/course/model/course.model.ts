@@ -15,6 +15,12 @@ export class CourseModel extends Document implements Course {
     @Prop({ type: Types.ObjectId, ref: 'User', required: true })
     instructor: Types.ObjectId;
 
+    @Prop({ type: String, default: '/images/default-thumbnail.png' })
+    thumbnail?: string;
+
+    @Prop({ type: Number, default: 0, required: true })
+    price: number;
+
     @Prop()
     createdAt: Date;
 

@@ -1,7 +1,7 @@
 import { PartialType } from "@nestjs/mapped-types";
 import { CreateCourseDto } from "./create-course.dto";
 import { ApiProperty } from "@nestjs/swagger";
-import { IsMongoId, IsNotEmpty, IsString } from "class-validator";
+import { IsMongoId, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
 
 
 export class UpdateCourseDto extends PartialType(CreateCourseDto) {
@@ -19,4 +19,14 @@ export class UpdateCourseDto extends PartialType(CreateCourseDto) {
     @IsMongoId()
     @IsNotEmpty()
     readonly instructor: string
+
+    @ApiProperty({ example: "/thumbnail.jpg" })
+    @IsString()
+    @IsOptional()
+    readonly thumbnail: string
+
+    @ApiProperty({ example: 0 })
+    @IsNotEmpty()
+    @IsNumber()
+    readonly price: number
 }
