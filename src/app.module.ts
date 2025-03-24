@@ -12,6 +12,7 @@ import { RolesModule } from './roles/roles.module';
 import { MailModule } from './mail/mail.module';
 import { CertificateModule } from './certificate/certificate.module';
 import { ModuleModule } from './module/module.module';
+import { EnrollmentModule } from './enrollment/enrollment.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { ModuleModule } from './module/module.module';
     ProgressModule,
     CertificateModule,
     ModuleModule,
+    EnrollmentModule,
   ],
   controllers: [AppController],
   providers: [AppService],
