@@ -10,11 +10,14 @@ import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { RolesModule } from './roles/roles.module';
 import { MailModule } from './mail/mail.module';
+import { CertificateModule } from './certificate/certificate.module';
+import { ModuleModule } from './module/module.module';
+import { EnrollmentModule } from './enrollment/enrollment.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
-      envFilePath: `.env.${'development.local'}`,
+      envFilePath: `.env`,
       isGlobal: true
     }),
     MongooseModule.forRoot(process.env.MONGO_URL!, {
@@ -27,6 +30,9 @@ import { MailModule } from './mail/mail.module';
     CourseModule,
     LessonModule,
     ProgressModule,
+    CertificateModule,
+    ModuleModule,
+    EnrollmentModule,
   ],
   controllers: [AppController],
   providers: [AppService],

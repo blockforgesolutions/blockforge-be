@@ -18,6 +18,12 @@ export class ProgressModel extends Document implements Progress {
 
     @Prop({ required: true, default: 0 })
     progressPercentage: number;
+
+    @Prop()
+    createdAt:Date
+
+    @Prop()
+    updatedAt:Date
 }
 
 export const ProgressSchema = SchemaFactory.createForClass(ProgressModel);

@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class UserResponse {
   @ApiProperty({ example: '507f1f77bcf86cd799439011' })
-  _id: string;
+  id: string;
 
   @ApiProperty({ example: 'john.doe@example.com' })
   email: string;

@@ -18,6 +18,7 @@ import { Role } from '../roles/role.schema';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { PasswordReset } from './password-reset.schema';
+import { transformMongoDocument } from 'src/common/utils/mongo.utils';
 
 @Injectable()
 export class AuthService {
@@ -68,9 +69,12 @@ export class AuthService {
 
     const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
 
+    const role = await this.roleModel.findOne({ name: "USER" });
+
     const user = await this.userModel.create({
       ...createUserDto,
       password: hashedPassword,
+      role: role?._id,
       provider: 'LOCAL',
     });
 
@@ -84,7 +88,10 @@ export class AuthService {
 
 
     // Send verification email
-    // await this.mailService.sendVerificationEmail(user, token);
+    const email = await this.mailService.sendVerificationEmail(user, token);
+    if (!email) {
+      throw new InternalServerErrorException("Email send failed");
+    }
     const newUser = await this.mapToUserResponse(user);
     return newUser
   }
@@ -314,13 +321,19 @@ export class AuthService {
       throw new NotFoundException(AuthMessages.USER_OR_ROLE_NOT_FOUND);
     }
 
+    const transformedUser = transformMongoDocument(populatedUser);
+    const transformedRole = transformMongoDocument(populatedUser.role);
+
+    if(!transformedUser || !transformedRole) {
+      throw new Error('Failed to transform user document');
+    }
+
     const response: AuthResponse = {
       access_token: token,
       user: {
-        ...populatedUser,
-        // eslint-disable-next-line @typescript-eslint/no-base-to-string
-        _id: String(populatedUser._id),
-        role: populatedUser.role.name
+        ...transformedUser,
+        id: transformedUser.id.toString(),
+        role: transformedRole.name
       }
     };
 

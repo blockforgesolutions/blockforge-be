@@ -5,6 +5,9 @@ import { Model } from 'mongoose';
 import { CreateLessonDto } from './dto/create-lesson.dto';
 import { ErrorResponseDto } from 'src/common/dto/error-response.dto';
 import { UpdateLessonDto } from './dto/update-lesson.dto';
+import { LessonResponse } from './model/lesson.response';
+import { transformMongoArray } from 'src/common/utils/mongo.utils';
+import { transformMongoData } from 'src/common/utils/transform.utils';
 
 @Injectable()
 export class LessonService {
@@ -12,29 +15,44 @@ export class LessonService {
         @InjectModel(LessonModel.name) private lessonModel: Model<LessonModel>
     ) { }
 
-    async createLesson(lesson: CreateLessonDto): Promise<LessonModel> {
-        const newLesson = new this.lessonModel(lesson).save();
+    async createLesson(lesson: CreateLessonDto): Promise<LessonResponse> {
+        const newLesson = await this.lessonModel.create(lesson);
 
-        return newLesson
+        const transformedLesson = transformMongoData(newLesson.toObject(), LessonResponse);
+
+        return transformedLesson
     }
 
-    async getLessons(): Promise<LessonModel[]> {
-        return this.lessonModel.find().exec();
+    async getLessons(): Promise<LessonResponse[]> {
+        const transformedLessons = transformMongoArray(await this.lessonModel.find().lean());
+        if (!transformedLessons) {
+            throw new HttpException(new ErrorResponseDto('Failed to transform course document'), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        return transformedLessons
     }
 
-    async getLessonById(lessonId: string): Promise<LessonModel> {
-        const lesson = await this.lessonModel.findById(lessonId).exec();
+    async getLessonById(lessonId: string): Promise<LessonResponse> {
+        const lesson = await this.lessonModel.findById(lessonId).lean();
 
         if (!lesson) {
             throw new HttpException(new ErrorResponseDto('Lesson not found'), HttpStatus.NOT_FOUND);
         }
-        return lesson;
+
+        const transformedLesson = transformMongoData(lesson, LessonResponse);
+
+        return transformedLesson
     }
 
-    async getLessonsByCourseId(courseId: string): Promise<LessonModel[]> {
-        const lessons = await this.lessonModel.find({ course: courseId }).exec();
+    async getLessonsByModuleId(moduleId: string): Promise<LessonResponse[]> {
+        const lessons = await this.lessonModel.find({ moduleId: moduleId }).lean();
 
-        return lessons;
+        const transformedLessons = transformMongoArray(lessons);
+        if (!transformedLessons) {
+            throw new HttpException(new ErrorResponseDto('Failed to transform course document'), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        return transformedLessons
     }
 
     async getLessonCountByCourseId(courseId: string): Promise<number> {
@@ -43,13 +61,16 @@ export class LessonService {
         return count;
     }
 
-    async updateLesson(lessonId: string, lesson: UpdateLessonDto): Promise<LessonModel> {
+    async updateLesson(lessonId: string, lesson: UpdateLessonDto): Promise<LessonResponse> {
         const updatedLesson = await this.lessonModel.findByIdAndUpdate(lessonId, lesson, { new: true }).exec();
 
         if (!updatedLesson) {
             throw new HttpException(new ErrorResponseDto('Lesson not found'), HttpStatus.NOT_FOUND);
         }
-        return updatedLesson;
+
+        const transformedLesson = transformMongoData(updatedLesson, LessonResponse);
+
+        return transformedLesson
     }
 
     async deleteLesson(lessonId: string) {

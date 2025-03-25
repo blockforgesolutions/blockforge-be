@@ -6,6 +6,8 @@ import { ErrorResponseDto } from 'src/common/dto/error-response.dto';
 import { UpdateProgressDto } from './dto/update-progress.dto';
 import { CreateProgressDto } from './dto/create-progress.dto';
 import { LessonService } from 'src/lesson/lesson.service';
+import { ProgressResponse } from './model/progress.response';
+import { transformMongoData } from 'src/common/utils/transform.utils';
 
 @Injectable()
 export class ProgressService {
@@ -14,37 +16,43 @@ export class ProgressService {
         private readonly lessonService: LessonService
     ) { }
 
-    async createProgress(progress: CreateProgressDto): Promise<ProgressModel> {
+    async createProgress(progress: CreateProgressDto): Promise<ProgressResponse> {
         if (!progress.completedLessons) {
             progress.completedLessons = [];
         }
 
         const newProgress = (await this.progressModel.create(progress));
 
-        return newProgress;
+        const transformedProgress = transformMongoData(newProgress.toObject(), ProgressResponse);
+
+        return transformedProgress;
     }
 
-    async getProgress(userId: string, courseId: string): Promise<ProgressModel> {
-        const progress = await this.progressModel.findOne({ userId, courseId }).exec();
+    async getProgress(userId: string, courseId: string): Promise<ProgressResponse> {
+        const progress = await this.progressModel.findOne({ userId, courseId }).lean();
 
         if (!progress) {
             throw new HttpException(new ErrorResponseDto('Progress not found'), HttpStatus.NOT_FOUND);
         }
 
-        return progress;
+        const transformedProgress = transformMongoData(progress, ProgressResponse);
+
+        return transformedProgress;
     }
 
-    async updateProgress(userId: string, courseId: string, progress: UpdateProgressDto): Promise<ProgressModel> {
+    async updateProgress(userId: string, courseId: string, progress: UpdateProgressDto): Promise<ProgressResponse> {
         const updatedProgress = await this.progressModel.findOneAndUpdate({ userId, courseId }, progress, { new: true }).exec();
 
         if (!updatedProgress) {
             throw new HttpException(new ErrorResponseDto('Progress not found'), HttpStatus.NOT_FOUND);
         }
 
-        return updatedProgress;
+        const transformedProgress = transformMongoData(updatedProgress, ProgressResponse);
+
+        return transformedProgress;
     }
 
-    async addLesson(userId: string, courseId: string, lessonId: string) {
+    async addLesson(userId: string, courseId: string, lessonId: string):Promise<ProgressResponse> {
         const progress = await this.progressModel.findOne({ userId, courseId }).exec();
 
         if (!progress) {
@@ -57,13 +65,15 @@ export class ProgressService {
 
         progress.completedLessons.push(new Types.ObjectId(lessonId));
         progress.progressPercentage = await this.calculatePercentage(progress.completedLessons.length, courseId);
-        // console.log(await this.calculatePercentage(userId, courseId));
+        await progress.save();
 
-        return progress.save();
+        const transformedProgress = transformMongoData(progress.toObject(), ProgressResponse);
+
+        return transformedProgress;
     }
 
 
-    async removeLesson(userId: string, courseId: string, lessonId: string): Promise<ProgressModel> {
+    async removeLesson(userId: string, courseId: string, lessonId: string): Promise<ProgressResponse> {
         const progress = await this.progressModel.findOne({ userId, courseId }).exec();
 
         if (!progress) {
@@ -79,7 +89,9 @@ export class ProgressService {
         progress.progressPercentage = await this.calculatePercentage(progress.completedLessons.length, courseId);
         await progress.save();
 
-        return progress
+        const transformedProgress = transformMongoData(progress.toObject(), ProgressResponse);
+
+        return transformedProgress;
     }
 
     async deleteProgress(userId: string, courseId: string) {
@@ -95,7 +107,7 @@ export class ProgressService {
     private async calculatePercentage(completedLessons: number, courseId: string) {
 
         const totalLessons = await this.lessonService.getLessonCountByCourseId(courseId);
-        console.log(totalLessons);
+        // console.log(totalLessons);
 
         if (totalLessons === 0) {
             return 0;
@@ -103,4 +115,5 @@ export class ProgressService {
 
         return (completedLessons / totalLessons) * 100;
     }
+
 }
