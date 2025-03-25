@@ -28,8 +28,12 @@ RUN npm install --production
 # Copy built application from builder stage
 COPY --from=builder /app/dist ./dist
 
+# Set environment variables
+ENV NODE_ENV=production
+ENV PORT=8080
+
 # Expose port
 EXPOSE 8080
 
 # Start the application
-CMD ["npm", "run", "start:prod"]
+CMD ["node", "dist/main"]
