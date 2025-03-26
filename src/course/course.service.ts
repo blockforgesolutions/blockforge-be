@@ -24,7 +24,8 @@ export class CourseService {
     }
 
     async getCourses(): Promise<CourseResponse[]> {
-        const transformedCourses = transformMongoArray(await this.courseModel.find().lean());
+        const courses = await this.courseModel.find().populate('instructor', '_id name surname picture').lean();
+        const transformedCourses = transformMongoArray(courses);
         if (!transformedCourses) {
             throw new HttpException(new ErrorResponseDto('Failed to transform course document'), HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -33,7 +34,7 @@ export class CourseService {
     }
 
     async getCourseById(courseId: string): Promise<CourseResponse> {
-        const course = await this.courseModel.findById(courseId).lean();
+        const course = await this.courseModel.findById(courseId).populate('instructor', 'id name surname').lean();
 
         if (!course) {
             throw new HttpException(new ErrorResponseDto('Course not found'), HttpStatus.NOT_FOUND);
@@ -45,7 +46,7 @@ export class CourseService {
     }
 
     async updateCourse(courseId: string, course: UpdateCourseDto): Promise<CourseResponse> {
-        const updatedCourse = await this.courseModel.findByIdAndUpdate(courseId, course, { new: true }).lean();
+        const updatedCourse = await this.courseModel.findByIdAndUpdate(courseId, course, { new: true }).populate('instructor', 'id name surname').lean();
 
         if (!updatedCourse) {
             throw new HttpException(new ErrorResponseDto('Course not found'), HttpStatus.NOT_FOUND);
@@ -64,4 +65,5 @@ export class CourseService {
 
         return { message: "Course successfully deleted!" };
     }
+
 }
