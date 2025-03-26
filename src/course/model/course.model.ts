@@ -21,6 +21,9 @@ export class CourseModel extends Document implements Course {
     @Prop({ type: Number, default: 0, required: true })
     price: number;
 
+    @Prop({ type: String, required: false })
+    slug: string
+
     @Prop()
     createdAt: Date;
 
