@@ -1,6 +1,7 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { Document, Types } from 'mongoose'
 import { Course } from "../interface/course.interface";
+import slugify from "slugify";
 
 export type CourseDocument = Course & Document;
 
@@ -21,7 +22,7 @@ export class CourseModel extends Document implements Course {
     @Prop({ type: Number, default: 0, required: true })
     price: number;
 
-    @Prop({ type: String, required: false })
+    @Prop({ type: String, required: false, unique:true })
     slug: string
 
     @Prop()
@@ -32,3 +33,10 @@ export class CourseModel extends Document implements Course {
 }
 
 export const CourseSchema = SchemaFactory.createForClass(CourseModel);
+
+CourseSchema.pre('save', function (next) {
+    if (this.title) {
+        this.slug = slugify(this.title, { lower: true, strict: true });
+    }
+    next();
+});

@@ -45,6 +45,19 @@ export class CourseService {
         return transformedCourse;
     }
 
+    async getCourseBySlug(slug:string): Promise<CourseResponse> {
+        
+        const course = await this.courseModel.findOne({slug}).populate('instructor', 'id name surname').lean();
+
+        if (!course) {
+            throw new HttpException(new ErrorResponseDto('Course not found'), HttpStatus.NOT_FOUND);
+        }
+
+        const transformedCourse = transformMongoData(course, CourseResponse);
+
+        return transformedCourse;
+    }
+
     async updateCourse(courseId: string, course: UpdateCourseDto): Promise<CourseResponse> {
         const updatedCourse = await this.courseModel.findByIdAndUpdate(courseId, course, { new: true }).populate('instructor', 'id name surname').lean();
 
