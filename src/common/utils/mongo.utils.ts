@@ -12,14 +12,19 @@ export function transformMongoDocument<T extends { _id: any; __v?: any }>(
 
   function transform(obj: any): any {
     if (Array.isArray(obj)) {
-      return obj.map(transform); // Eğer dizi ise içindeki nesneleri dönüştür
+      return obj.map(transform); 
     } else if (obj !== null && typeof obj === 'object') {
       const { _id, __v, ...rest } = obj;
+  
+      if (obj instanceof Date) {
+        return obj.toISOString();
+      }
+  
       return {
-        id: _id ?? obj.id, // _id varsa id olarak değiştir
+        id: _id ? _id.toString() : obj.id,
         ...Object.fromEntries(
           Object.entries(rest).map(([key, value]) => [key, transform(value)])
-        ), // İç içe geçmiş nesneleri de dönüştür
+        ),
       };
     }
     return obj;
