@@ -15,8 +15,8 @@ export class EnrollmentService {
         @InjectModel(EnrollmentModel.name) private readonly enrollmentModel: Model<EnrollmentModel>,
     ) { }
 
-    async createEnrollment(enrollment: CreateEnrollmentDto): Promise<EnrollmentResponse> {
-        const newEnrollment = await this.enrollmentModel.create(enrollment);
+    async createEnrollment(userId: string, enrollment: CreateEnrollmentDto): Promise<EnrollmentResponse> {
+        const newEnrollment = await this.enrollmentModel.create({ ...enrollment, userId });
 
         const translatedEnrollment = transformMongoData(newEnrollment.toObject(), EnrollmentResponse);
 

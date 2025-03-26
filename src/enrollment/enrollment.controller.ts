@@ -26,8 +26,8 @@ export class EnrollmentController {
     })
     @ApiResponse({ status: 400, description: EnrollmentMessages.INVALID_CREDENTIALS })
     @ApiResponse({ status: 401, description: EnrollmentMessages.UNAUTHORIZED_ACCESS })
-    async createEnrollment(@Body() createEnrollmentDto: CreateEnrollmentDto) {
-        return await this.enrollmentService.createEnrollment(createEnrollmentDto);
+    async createEnrollment(@Request() req, @Body() createEnrollmentDto: CreateEnrollmentDto) {
+        return await this.enrollmentService.createEnrollment( req.user.id ,createEnrollmentDto);
     }
 
 
@@ -93,8 +93,7 @@ export class EnrollmentController {
     @ApiOperation({ summary: 'Delete enrollment', description: 'Returns the deleted enrollment' })
     @ApiResponse({
         status: 204,
-        description: EnrollmentMessages.DELETED,
-        type: EnrollmentResponse
+        description: EnrollmentMessages.DELETED
     })
     @ApiResponse({ status: 401, description: EnrollmentMessages.UNAUTHORIZED_ACCESS })
     @ApiResponse({ status: 403, description: EnrollmentMessages.UNAUTHORIZED_ACCESS })
