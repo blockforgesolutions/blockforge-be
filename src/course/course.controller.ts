@@ -60,6 +60,22 @@ export class CourseController {
         return await this.courseService.getCourseById(courseId);
     }
 
+    @Get('slug/:slug')
+    @ApiOperation({ summary: "Get course by slug", description: "Returns course by slug" })
+    @ApiResponse({
+        status: 200,
+        description: 'The course has been successfully fetched.',
+        type: CourseResponse
+    })
+    @ApiParam({
+        name: 'slug',
+        description: 'The course slug',
+    })
+    @ApiResponse({ status: 404, description: CourseMessages.NOT_FOUND })
+    async getCourseBySlug(@Param('slug') slug: string) {        
+        return await this.courseService.getCourseBySlug(slug);
+    }
+
     @Put(':courseId')
     @ApiSecurity('bearer')
     @UseGuards(JwtAuthGuard, RoleGuard)

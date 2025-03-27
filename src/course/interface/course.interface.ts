@@ -5,5 +5,6 @@ export interface Course {
     description: string,
     instructor: Types.ObjectId,
     thumbnail?: string,
-    price: number
+    price: number,
+    slug:string
 }

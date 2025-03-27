@@ -13,6 +13,7 @@ import { MailModule } from './mail/mail.module';
 import { CertificateModule } from './certificate/certificate.module';
 import { ModuleModule } from './module/module.module';
 import { EnrollmentModule } from './enrollment/enrollment.module';
+import { PaymentModule } from './payment/payment.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { EnrollmentModule } from './enrollment/enrollment.module';
     CertificateModule,
     ModuleModule,
     EnrollmentModule,
+    PaymentModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -69,7 +69,7 @@ export class LessonController {
         return await this.lessonService.getLessonById(lessonId);
     }
 
-    @Get('getModuleLessons/:moduleId')
+    @Get('module/:moduleId')
     @ApiOperation({ summary: 'Get all lessons by module id', description: 'Returns all lessons by module id' })
     @ApiParam({ name: 'moduleId', type: String, description: 'The id of the module' })
     @ApiResponse({
