@@ -34,7 +34,7 @@ export class CourseService {
     }
 
     async getCourseById(courseId: string): Promise<CourseResponse> {
-        const course = await this.courseModel.findById(courseId).populate('instructor', 'id name surname').lean();
+        const course = await this.courseModel.findById(courseId).populate('instructor', 'id name surname picture').lean();
 
         if (!course) {
             throw new HttpException(new ErrorResponseDto('Course not found'), HttpStatus.NOT_FOUND);
@@ -47,7 +47,7 @@ export class CourseService {
 
     async getCourseBySlug(slug:string): Promise<CourseResponse> {
         
-        const course = await this.courseModel.findOne({slug}).populate('instructor', 'id name surname').lean();
+        const course = await this.courseModel.findOne({slug}).populate('instructor', 'id name surname picture').lean();
 
         if (!course) {
             throw new HttpException(new ErrorResponseDto('Course not found'), HttpStatus.NOT_FOUND);
