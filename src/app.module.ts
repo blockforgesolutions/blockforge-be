@@ -14,6 +14,7 @@ import { CertificateModule } from './certificate/certificate.module';
 import { ModuleModule } from './module/module.module';
 import { EnrollmentModule } from './enrollment/enrollment.module';
 import { PaymentModule } from './payment/payment.module';
+import { CategoryModule } from './category/category.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { PaymentModule } from './payment/payment.module';
     ModuleModule,
     EnrollmentModule,
     PaymentModule,
+    CategoryModule,
   ],
   controllers: [AppController],
   providers: [AppService],
