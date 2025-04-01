@@ -1,10 +1,11 @@
-import { Types } from "mongoose";
+import { Schema } from "mongoose";
 
 export interface Course {
     title: string,
     description: string,
-    instructor: Types.ObjectId,
+    instructor: Schema.Types.ObjectId,
     thumbnail?: string,
     price: number,
-    slug:string
+    slug:string,
+    categories: Schema.Types.ObjectId[],
 }

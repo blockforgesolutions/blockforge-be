@@ -1,5 +1,4 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { Types } from "mongoose";
 
 class InstructorDto {
     @ApiProperty({ example: "67daa8881f4c61f101046612" })
@@ -15,7 +14,19 @@ class InstructorDto {
     picture?: string
 }
 
-export class CourseResponse {
+class CategoryDto {
+    @ApiProperty({ example: "67daa8881f4c61f101046612" })
+    id: string
+
+    @ApiProperty({ example: "tech" })
+    name: string
+
+    @ApiProperty({ example: "COURSE" })
+    type: string
+}
+
+
+export class CourseResponse{
     @ApiProperty({ example: "67daa8881f4c61f101046612" })
     id: string
 
@@ -32,7 +43,10 @@ export class CourseResponse {
     thumbnail?: string
 
     @ApiProperty({ type: InstructorDto })
-    instructor: Types.ObjectId
+    instructor: InstructorDto
+
+    @ApiProperty({ type: [CategoryDto] })
+    categories: CategoryDto[]
 
     @ApiProperty({ example: 0 })
     price: number

@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
-import { Document, Types } from 'mongoose'
+import { Document, Schema as MongooseSchema } from 'mongoose'
 import { Course } from "../interface/course.interface";
 import slugify from "slugify";
 
@@ -13,8 +13,8 @@ export class CourseModel extends Document implements Course {
     @Prop({ required: true })
     description: string;
 
-    @Prop({ type: Types.ObjectId, ref: 'User', required: true })
-    instructor: Types.ObjectId;
+    @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'User', required: true })
+    instructor: MongooseSchema.Types.ObjectId;
 
     @Prop({ type: String, default: '/images/default-thumbnail.png' })
     thumbnail?: string;
@@ -22,8 +22,11 @@ export class CourseModel extends Document implements Course {
     @Prop({ type: Number, default: 0, required: true })
     price: number;
 
-    @Prop({ type: String, required: false, unique:true })
+    @Prop({ type: String, required: false, unique: true })
     slug: string
+
+    @Prop({ type: [{ type: MongooseSchema.Types.ObjectId, ref: 'CategoryModel' }] })
+    categories: MongooseSchema.Types.ObjectId[];
 
     @Prop()
     createdAt: Date;

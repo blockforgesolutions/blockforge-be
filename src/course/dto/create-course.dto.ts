@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsMongoId, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
+import { IsArray, IsMongoId, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
 
 export class CreateCourseDto {
     @ApiProperty({ example: "Course Title" })
@@ -16,6 +16,11 @@ export class CreateCourseDto {
     @IsMongoId()
     @IsNotEmpty()
     readonly instructor: string
+
+    @ApiProperty({example: ["67daa8881f4c61f101046612", "67daa8881f4c61f101046612"]})
+    @IsArray()
+    @IsNotEmpty()
+    readonly categories: string[]
 
     @ApiProperty({example: "/thumbnail.jpg"})
     @IsString()

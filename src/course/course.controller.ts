@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { CourseService } from './course.service';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
@@ -8,12 +8,14 @@ import { Roles } from 'src/common/decorators/roles.decorator';
 import { ApiBody, ApiOperation, ApiParam, ApiResponse, ApiSecurity, ApiTags } from '@nestjs/swagger';
 import { CourseResponse } from './model/course.response';
 import { CourseMessages } from 'src/common/enums/course-message.enum';
+import { UserService } from 'src/user/user.service';
 
 @ApiTags('Course')
 @Controller('course')
 export class CourseController {
     constructor(
-        private readonly courseService: CourseService
+        private readonly courseService: CourseService,
+        private readonly userService: UserService
     ) { }
 
     @Post()
@@ -72,8 +74,23 @@ export class CourseController {
         description: 'The course slug',
     })
     @ApiResponse({ status: 404, description: CourseMessages.NOT_FOUND })
-    async getCourseBySlug(@Param('slug') slug: string) {        
+    async getCourseBySlug(@Param('slug') slug: string) {
         return await this.courseService.getCourseBySlug(slug);
+    }
+
+    @Get('category/:categoryId')
+    @ApiOperation({ summary: "Get courses by category id", description: "Returns courses by category id" })
+    @ApiResponse({
+        status: 200,
+        description: 'The courses have been successfully fetched.',
+        type: [CourseResponse]
+    })
+    async getCoursesByCategoryId(
+        @Param('categoryId') categoryId: string,
+        @Query('page') page = 1,
+        @Query('limit') limit = 10,
+    ) {
+        return this.courseService.getCoursesByCategoryId(categoryId, Number(page), Number(limit));
     }
 
     @Put(':courseId')
