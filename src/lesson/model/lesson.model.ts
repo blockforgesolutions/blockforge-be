@@ -1,6 +1,7 @@
 import { Document, Types } from "mongoose";
 import { Lesson } from "../interface/lesson.interface";
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
+import slugify from "slugify";
 
 export type LessonDocument = Lesson & Document;
 
@@ -21,6 +22,9 @@ export class LessonModel extends Document implements Lesson {
     @Prop()
     quiz?: [string];
 
+    @Prop({required:false, unique:true, type: String})
+    slug: string
+
     @Prop()
     createdAt: Date;
 
@@ -29,3 +33,10 @@ export class LessonModel extends Document implements Lesson {
 }
 
 export const LessonSchema = SchemaFactory.createForClass(LessonModel);
+
+LessonSchema.pre('save', function (next) {
+    if (this.title) {
+        this.slug = slugify(this.title, { lower: true, strict: true });
+    }
+    next();
+});
