@@ -72,8 +72,7 @@ export class CategoryController {
     @ApiResponse({
         status: 200,
         description: 'Categories returned',
-        type: [CategoryResponse],
-        isArray: true
+        type: [CategoryResponse]
     })
     async getCategoriesByType(@Param('type') type: string) {
         return await this.categoryService.getCategoriesByType(type);
