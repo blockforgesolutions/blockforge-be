@@ -8,11 +8,16 @@ import { UpdateLessonDto } from './dto/update-lesson.dto';
 import { LessonResponse } from './model/lesson.response';
 import { transformMongoArray } from 'src/common/utils/mongo.utils';
 import { transformMongoData } from 'src/common/utils/transform.utils';
+import { ModuleService } from 'src/module/module.service';
+import { CourseService } from 'src/course/course.service';
+import { FullCourseResponse } from './model/full-course.response';
 
 @Injectable()
 export class LessonService {
     constructor(
-        @InjectModel(LessonModel.name) private lessonModel: Model<LessonModel>
+        @InjectModel(LessonModel.name) private lessonModel: Model<LessonModel>,
+        private readonly moduleService: ModuleService,
+        private readonly courseService: CourseService
     ) { }
 
     async createLesson(lesson: CreateLessonDto): Promise<LessonResponse> {
@@ -61,6 +66,24 @@ export class LessonService {
         return count;
     }
 
+    async getFullCourseByLessonSlug(lessonSlug: string): Promise<FullCourseResponse> {
+        const lesson = await this.lessonModel.findOne({ slug: lessonSlug }).lean();
+
+        if (!lesson) {
+            throw new HttpException(new ErrorResponseDto('Lesson not found'), HttpStatus.NOT_FOUND);
+        }
+
+        const transformedLesson = transformMongoData(lesson, LessonResponse);
+
+        const module = await this.moduleService.getModuleById(String(lesson.moduleId));
+
+        const course = await this.courseService.getCourseById(String(module.course));
+
+        const modules = await this.moduleService.getCourseModules(String(module.course));
+
+        return { course: course, modules: modules, lesson: transformedLesson };
+    }
+
     async updateLesson(lessonId: string, lesson: UpdateLessonDto): Promise<LessonResponse> {
         const updatedLesson = await this.lessonModel.findByIdAndUpdate(lessonId, lesson, { new: true }).exec();
 
@@ -72,6 +95,8 @@ export class LessonService {
 
         return transformedLesson
     }
+
+
 
     async deleteLesson(lessonId: string) {
         const deletedLesson = await this.lessonModel.findByIdAndDelete(lessonId).exec();
