@@ -78,19 +78,19 @@ export class CourseController {
         return await this.courseService.getCourseBySlug(slug);
     }
 
-    @Get('category/:categoryId')
+    @Get('/categories/filter')
     @ApiOperation({ summary: "Get courses by category id", description: "Returns courses by category id" })
     @ApiResponse({
         status: 200,
         description: 'The courses have been successfully fetched.',
         type: [CourseResponse]
     })
-    async getCoursesByCategoryId(
-        @Param('categoryId') categoryId: string,
+    async getCoursesByCategories(
+        @Query('categories') categories: string | string[],
         @Query('page') page = 1,
         @Query('limit') limit = 10,
     ) {
-        return this.courseService.getCoursesByCategoryId(categoryId, Number(page), Number(limit));
+        return this.courseService.getCoursesByCategories(categories, Number(page), Number(limit));
     }
 
     @Put(':courseId')

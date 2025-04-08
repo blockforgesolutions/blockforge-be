@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { CourseDocument, CourseModel } from './model/course.model';
-import { Model } from 'mongoose';
+import mongoose, { Model } from 'mongoose';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { ErrorResponseDto } from 'src/common/dto/error-response.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
@@ -76,10 +76,27 @@ export class CourseService {
         return transformedCourse;
     }
 
-    async getCoursesByCategoryId(categoryId: string, page: number, limit: number): Promise<CourseResponse[]> {
+    async getCoursesByCategories(categoryIds: string | string[], page: number, limit: number): Promise<CourseResponse[]> {        
+        let filter = {};
+
+        const categoryArray = Array.isArray(categoryIds) ? categoryIds : [categoryIds].filter(Boolean);
+
+        if (categoryArray.length > 0) {
+            const validCategoryIds = categoryArray.filter(id =>
+                mongoose.Types.ObjectId.isValid(id)
+            );
+
+            if (validCategoryIds.length > 0) {
+                const objectIdCategories = validCategoryIds.map(id => new mongoose.Types.ObjectId(id));
+
+                filter = {
+                    categories: { $all: objectIdCategories }
+                };
+            }
+        }
 
         const courses = await this.courseModel
-            .find({ categories: { $in: [categoryId] } })
+            .find(filter)
             .skip((page - 1) * limit)
             .limit(limit)
             .populate('instructor', 'id name surname picture')
