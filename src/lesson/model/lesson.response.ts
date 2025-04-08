@@ -14,6 +14,9 @@ export class LessonResponse {
     @ApiProperty({ example: "Course id: 67daa8881f4c61f101046612" })
     moduleId: Types.ObjectId
 
+    @ApiProperty({ example: "lesson-slug" })
+    slug: string
+
     @ApiProperty({ example: "https://example.com/video.mp4" })
     videoUrl: string
 

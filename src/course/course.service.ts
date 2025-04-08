@@ -1,11 +1,11 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { CourseModel } from './model/course.model';
-import { Model } from 'mongoose';
+import { CourseDocument, CourseModel } from './model/course.model';
+import mongoose, { Model } from 'mongoose';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { ErrorResponseDto } from 'src/common/dto/error-response.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
-import { transformMongoArray } from 'src/common/utils/mongo.utils';
+import { transformMongoArray, transformMongoDocument } from 'src/common/utils/mongo.utils';
 import { CourseResponse } from './model/course.response';
 import { transformMongoData } from 'src/common/utils/transform.utils';
 
@@ -16,24 +16,41 @@ export class CourseService {
     ) { }
 
     async createCourse(course: CreateCourseDto): Promise<CourseResponse> {
-        const newCourse = await this.courseModel.create(course);
+        const newCourse = new this.courseModel(course);
 
-        const transformedCourse = transformMongoData(newCourse.toObject(), CourseResponse);
+        await newCourse.save();
+
+        const populatedCourse = await newCourse.populate([
+            { path: 'instructor', select: 'id name surname picture' },
+            { path: 'categories', select: 'id name type' }
+        ]);
+
+        if (!populatedCourse) {
+            throw new Error('Course creation failed');
+        }
+
+        const transformedCourse = transformMongoDocument<CourseDocument, CourseResponse>(populatedCourse.toObject());
+
+
+        if (!transformedCourse) {
+            throw new Error('Course creation failed');
+        }
 
         return transformedCourse;
     }
 
     async getCourses(): Promise<CourseResponse[]> {
-        const transformedCourses = transformMongoArray(await this.courseModel.find().lean());
-        if (!transformedCourses) {
-            throw new HttpException(new ErrorResponseDto('Failed to transform course document'), HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        const courses = await this.courseModel.find().populate('instructor', 'id name surname picture')
+            .populate('categories', 'id name type slug')
+            .lean();
 
-        return transformedCourses;
+        return transformMongoArray<CourseDocument, CourseResponse>(courses);
     }
 
     async getCourseById(courseId: string): Promise<CourseResponse> {
-        const course = await this.courseModel.findById(courseId).lean();
+        const course = await this.courseModel.findById(courseId).populate('instructor', 'id name surname picture')
+            .populate('categories', 'id name type slug')
+            .lean();
 
         if (!course) {
             throw new HttpException(new ErrorResponseDto('Course not found'), HttpStatus.NOT_FOUND);
@@ -44,8 +61,53 @@ export class CourseService {
         return transformedCourse;
     }
 
+    async getCourseBySlug(slug: string): Promise<CourseResponse> {
+
+        const course = await this.courseModel.findOne({ slug }).populate('instructor', 'id name surname picture')
+            .populate('categories', 'id name type slug')
+            .lean();
+
+        if (!course) {
+            throw new HttpException(new ErrorResponseDto('Course not found'), HttpStatus.NOT_FOUND);
+        }
+
+        const transformedCourse = transformMongoData(course, CourseResponse);
+
+        return transformedCourse;
+    }
+
+    async getCoursesByCategories(categoryIds: string | string[], page: number, limit: number): Promise<CourseResponse[]> {        
+        let filter = {};
+
+        const categoryArray = Array.isArray(categoryIds) ? categoryIds : [categoryIds].filter(Boolean);
+
+        if (categoryArray.length > 0) {
+            const validCategoryIds = categoryArray.filter(id =>
+                mongoose.Types.ObjectId.isValid(id)
+            );
+
+            if (validCategoryIds.length > 0) {
+                const objectIdCategories = validCategoryIds.map(id => new mongoose.Types.ObjectId(id));
+
+                filter = {
+                    categories: { $all: objectIdCategories }
+                };
+            }
+        }
+
+        const courses = await this.courseModel
+            .find(filter)
+            .skip((page - 1) * limit)
+            .limit(limit)
+            .populate('instructor', 'id name surname picture')
+            .populate('categories', 'id name type slug')
+            .lean();
+
+        return transformMongoArray<CourseDocument, CourseResponse>(courses);
+    }
+
     async updateCourse(courseId: string, course: UpdateCourseDto): Promise<CourseResponse> {
-        const updatedCourse = await this.courseModel.findByIdAndUpdate(courseId, course, { new: true }).lean();
+        const updatedCourse = await this.courseModel.findByIdAndUpdate(courseId, course, { new: true }).populate('instructor', 'id name surname').lean();
 
         if (!updatedCourse) {
             throw new HttpException(new ErrorResponseDto('Course not found'), HttpStatus.NOT_FOUND);
@@ -64,4 +126,5 @@ export class CourseService {
 
         return { message: "Course successfully deleted!" };
     }
+
 }

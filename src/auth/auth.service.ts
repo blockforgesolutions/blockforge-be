@@ -19,6 +19,8 @@ import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { PasswordReset } from './password-reset.schema';
 import { transformMongoDocument } from 'src/common/utils/mongo.utils';
+import { GoogleStorageService } from 'src/google-storage/google-storage.service';
+import { FolderNames } from 'src/common/enums/folder-names.enum';
 
 @Injectable()
 export class AuthService {
@@ -32,6 +34,7 @@ export class AuthService {
     private jwtService: JwtService,
     private configService: ConfigService,
     private mailService: MailService,
+    private googleStorageService: GoogleStorageService
   ) {
     this.googleClient = new OAuth2Client(
       this.configService.get('GOOGLE_CLIENT_ID'),
@@ -94,6 +97,20 @@ export class AuthService {
     }
     const newUser = await this.mapToUserResponse(user);
     return newUser
+  }
+
+  async uploadProfileImage(userId: string, image: Express.Multer.File): Promise<{ message: string }> {
+    const user = await this.userModel.findById(userId);
+    if (!user) {
+      throw new NotFoundException(AuthMessages.USER_NOT_FOUND);
+    }
+
+    const path = await this.googleStorageService.uploadFile(image, FolderNames.USER);
+
+    user.picture = path;
+    await user.save();
+
+    return { message: "Profile image uploaded successfully" }
   }
 
   async verifyEmail(token: string): Promise<AuthResponse | { message: string }> {
@@ -324,7 +341,7 @@ export class AuthService {
     const transformedUser = transformMongoDocument(populatedUser);
     const transformedRole = transformMongoDocument(populatedUser.role);
 
-    if(!transformedUser || !transformedRole) {
+    if (!transformedUser || !transformedRole) {
       throw new Error('Failed to transform user document');
     }
 

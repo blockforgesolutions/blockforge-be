@@ -1,5 +1,5 @@
-import { Controller, Post, Body, UseGuards, Get, HttpCode, HttpStatus, Query } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
+import { Controller, Post, Body, UseGuards, Get, HttpCode, HttpStatus, Query, UseInterceptors, UploadedFile, Request } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiBearerAuth, ApiQuery, ApiConsumes } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from '../user/dto/create-user.dto';
 import { SocialUserDto } from '../user/dto/social-user.dto';
@@ -10,6 +10,7 @@ import { AuthResponse } from './models/auth.response';
 import { AuthMessages } from '../common/enums/messages.enum';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @ApiTags('Authentication')
 @Controller('auth')
@@ -33,6 +34,34 @@ export class AuthController {
   })
   async signup(@Body() createUserDto: CreateUserDto): Promise<AuthResponse> {
     return this.authService.signup(createUserDto);
+  }
+
+  @Post('picture')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Upload a photo',
+    description: 'Uploads a photo to Google Cloud Storage'
+  })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        picture: {
+          type: 'string',
+          format: 'binary',
+          description: 'Profile photo'
+        },
+      },
+    },
+  })
+  @ApiResponse({ status: 201, description: 'Photo uploaded successfully' })
+  @ApiResponse({ status: 404, description: AuthMessages.USER_NOT_FOUND })
+  @UseInterceptors(FileInterceptor('picture'))
+  async uploadPhoto(@Request() req, @UploadedFile() file: Express.Multer.File): Promise<{ message: string }> {
+    const fileUrl = await this.authService.uploadProfileImage(req.user.id,file);
+    return fileUrl;
   }
 
   @Get('verify-email')

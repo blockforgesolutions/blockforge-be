@@ -12,6 +12,7 @@ import { RoleGuard } from 'src/common/guards/role.guard';
     MongooseModule.forFeature([{name: CourseModel.name, schema: CourseSchema}])
   ],
   providers: [CourseService, RoleGuard],
-  controllers: [CourseController]
+  controllers: [CourseController],
+  exports:[CourseService]
 })
 export class CourseModule {}

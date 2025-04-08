@@ -14,6 +14,7 @@ import { PrivilegeGuard } from './guards/privilege.guard';
 import { Role, RoleSchema } from '../roles/role.schema';
 import { PasswordReset } from './password-reset.schema';
 import { SchemaFactory } from '@nestjs/mongoose';
+import { GoogleStorageModule } from 'src/google-storage/google-storage.module';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { SchemaFactory } from '@nestjs/mongoose';
     }),
     PassportModule.register({ defaultStrategy: 'jwt' }),
     MailModule,
+    GoogleStorageModule
   ],
   controllers: [AuthController],
   providers: [
