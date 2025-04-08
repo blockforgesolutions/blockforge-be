@@ -8,6 +8,7 @@ import { CreateEnrollmentDto } from './dto/create-enrollment.dto';
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { RoleGuard } from 'src/common/guards/role.guard';
 import { UpdateEnrollmentDto } from './dto/update-enrollment.dto';
+import { boolean } from 'joi';
 
 @Controller('enrollment')
 @UseGuards(JwtAuthGuard)
@@ -27,7 +28,7 @@ export class EnrollmentController {
     @ApiResponse({ status: 400, description: EnrollmentMessages.INVALID_CREDENTIALS })
     @ApiResponse({ status: 401, description: EnrollmentMessages.UNAUTHORIZED_ACCESS })
     async createEnrollment(@Request() req, @Body() createEnrollmentDto: CreateEnrollmentDto) {
-        return await this.enrollmentService.createEnrollment( req.user.id ,createEnrollmentDto);
+        return await this.enrollmentService.createEnrollment(req.user.id, createEnrollmentDto);
     }
 
 
@@ -54,6 +55,19 @@ export class EnrollmentController {
     @ApiResponse({ status: 401, description: EnrollmentMessages.UNAUTHORIZED_ACCESS })
     async getUserEnrollments(@Request() req) {
         return await this.enrollmentService.getUserEnrollments(req.user.id);
+    }
+
+    @Get('/user/:courseId')
+    @ApiOperation({ summary: 'Get user enrollment', description: 'Returns user enrollment' })
+    @ApiResponse({
+        status: 200,
+        description: "Get user enrollment",
+        type: boolean
+    })
+    @ApiResponse({ status: 401, description: EnrollmentMessages.UNAUTHORIZED_ACCESS })
+    @ApiResponse({ status: 404, description: EnrollmentMessages.NOT_FOUND })
+    async getUserEnrollmentByUserIdAndCourseId(@Request() req, @Param('courseId') courseId: string) {
+        return await this.enrollmentService.checkEnrollment(req.user.id, courseId);
     }
 
     @Get(':enrollmentId')

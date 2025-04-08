@@ -41,6 +41,12 @@ export class EnrollmentService {
         return transformedEnrollments
     }
 
+    async checkEnrollment(userId: string, courseId: string): Promise<boolean> {
+        const enrollment = await this.enrollmentModel.findOne({ userId, courseId }).lean();
+
+        return enrollment ? true : false
+    }
+
     async getEnrollmentById(enrollmentId: string): Promise<EnrollmentResponse> {
         const enrollment = await this.enrollmentModel.findById(enrollmentId).lean();
 
