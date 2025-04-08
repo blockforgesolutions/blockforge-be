@@ -16,6 +16,7 @@ import { EnrollmentModule } from './enrollment/enrollment.module';
 import { PaymentModule } from './payment/payment.module';
 import { CategoryModule } from './category/category.module';
 import { BlogModule } from './blog/blog.module';
+import { GoogleStorageModule } from './google-storage/google-storage.module';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { BlogModule } from './blog/blog.module';
     PaymentModule,
     CategoryModule,
     BlogModule,
+    GoogleStorageModule,
   ],
   controllers: [AppController],
   providers: [AppService],
