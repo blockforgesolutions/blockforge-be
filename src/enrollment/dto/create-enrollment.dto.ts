@@ -10,6 +10,6 @@ export class CreateEnrollmentDto {
     @ApiProperty({ example: 0.00 })
     @IsNotEmpty()
     @IsNumber()
-    readonly price: number
+    readonly amount: number
 
 }
