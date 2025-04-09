@@ -91,10 +91,10 @@ export class AuthService {
 
 
     // Send verification email
-    const email = await this.mailService.sendVerificationEmail(user, token);
-    if (!email) {
-      throw new InternalServerErrorException("Email send failed");
-    }
+    // const email = await this.mailService.sendVerificationEmail(user, token);
+    // if (!email) {
+    //   throw new InternalServerErrorException("Email send failed");
+    // }
     const newUser = await this.mapToUserResponse(user);
     return newUser
   }

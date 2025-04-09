@@ -1,4 +1,4 @@
-import { Controller, Post, Body, UseGuards, Get, HttpCode, HttpStatus, Query, UseInterceptors, UploadedFile, Request } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Get, HttpCode, HttpStatus, Query, UseInterceptors, UploadedFile } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiBearerAuth, ApiQuery, ApiConsumes } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from '../user/dto/create-user.dto';
@@ -37,8 +37,6 @@ export class AuthController {
   }
 
   @Post('picture')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
   @ApiOperation({
     summary: 'Upload a photo',
     description: 'Uploads a photo to Google Cloud Storage'
@@ -48,6 +46,11 @@ export class AuthController {
     schema: {
       type: 'object',
       properties: {
+        userId: {
+          type: 'string',
+          description: 'User ID',
+          pattern: '^[0-9a-fA-F]{24}$',
+        },
         picture: {
           type: 'string',
           format: 'binary',
@@ -59,8 +62,8 @@ export class AuthController {
   @ApiResponse({ status: 201, description: 'Photo uploaded successfully' })
   @ApiResponse({ status: 404, description: AuthMessages.USER_NOT_FOUND })
   @UseInterceptors(FileInterceptor('picture'))
-  async uploadPhoto(@Request() req, @UploadedFile() file: Express.Multer.File): Promise<{ message: string }> {
-    const fileUrl = await this.authService.uploadProfileImage(req.user.id,file);
+  async uploadPhoto(@Body('userId') userId: string, @UploadedFile() file: Express.Multer.File): Promise<{ message: string }> {
+    const fileUrl = await this.authService.uploadProfileImage(userId, file);
     return fileUrl;
   }
 
