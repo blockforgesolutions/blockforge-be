@@ -13,7 +13,7 @@ import { ChangePasswordDto } from '../user/dto/change-password.dto';
 import { EmailVerification } from './email-verification.schema';
 import { MailService } from '../mail/mail.service';
 import { AuthResponse } from './models/auth.response';
-import { AuthMessages, MailMessages } from '../common/enums/messages.enum';
+import { AuthMessages, MailMessages } from '../common/enums/api-enums/messages.enum';
 import { Role } from '../roles/role.schema';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';

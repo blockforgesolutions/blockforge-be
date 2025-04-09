@@ -4,7 +4,7 @@ import { UserService } from './user.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { User as UserDecorator } from '../auth/decorators/user.decorator';
-import { UserMessages } from '../common/enums/messages.enum';
+import { UserMessages } from '../common/enums/api-enums/messages.enum';
 import { CurrentUserResponse } from './models/user.response';
 
 @ApiTags('Users')

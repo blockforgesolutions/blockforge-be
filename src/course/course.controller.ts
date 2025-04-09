@@ -7,7 +7,7 @@ import { RoleGuard } from 'src/common/guards/role.guard';
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { ApiBody, ApiOperation, ApiParam, ApiResponse, ApiSecurity, ApiTags } from '@nestjs/swagger';
 import { CourseResponse } from './model/course.response';
-import { CourseMessages } from 'src/common/enums/course-message.enum';
+import { CourseMessages } from 'src/common/enums/api-enums/course-message.enum';
 import { UserService } from 'src/user/user.service';
 
 @ApiTags('Course')

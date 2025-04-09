@@ -3,7 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Role } from './role.schema';
 import { CreateRoleDto } from './dto/create-role.dto';
-import { RoleMessages } from '../common/enums/messages.enum';
+import { RoleMessages } from '../common/enums/api-enums/messages.enum';
 import { User } from '../user/user.schema';
 import { transformMongoDocument } from '../common/utils/mongo.utils';
 import { RoleResponse, CreateRoleResponse, UpdateRoleResponse } from './models/role.response';

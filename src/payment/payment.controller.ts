@@ -1,7 +1,7 @@
 import { Controller, Param, Post, Request, UseGuards } from '@nestjs/common';
 import { PaymentService } from './payment.service';
 import { ApiOperation, ApiResponse, ApiSecurity, ApiTags } from '@nestjs/swagger';
-import { PaymentMessages } from 'src/common/enums/payment-message.enum';
+import { PaymentMessages } from 'src/common/enums/api-enums/payment-message.enum';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 
 @Controller('payment')

@@ -1,7 +1,7 @@
 import { Controller, Get, Query } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { MailService } from './mail.service';
-import { MailMessages } from '../common/enums/messages.enum';
+import { MailMessages } from '../common/enums/api-enums/messages.enum';
 
 @ApiTags('Mail')
 @Controller('mail')

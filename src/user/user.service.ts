@@ -3,7 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { User } from './user.schema';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { UserMessages } from '../common/enums/messages.enum';
+import { UserMessages } from '../common/enums/api-enums/messages.enum';
 import { transformMongoDocument } from '../common/utils/mongo.utils';
 import { CurrentUserResponse } from './models/user.response';
 

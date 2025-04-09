@@ -4,7 +4,7 @@ import { CreateProgressDto } from './dto/create-progress.dto';
 import { UpdateProgressDto } from './dto/update-progress.dto';
 import { ApiOperation, ApiParam, ApiResponse, ApiSecurity, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-import { ProgressMessages } from 'src/common/enums/progress-message.enum';
+import { ProgressMessages } from 'src/common/enums/api-enums/progress-message.enum';
 import { ProgressResponse } from './model/progress.response';
 
 @ApiTags('Progress')

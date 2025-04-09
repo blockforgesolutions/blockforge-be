@@ -5,7 +5,7 @@ import { RoleGuard } from 'src/common/guards/role.guard';
 import { ModuleService } from './module.service';
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { ModuleResponse } from './model/module.response';
-import { ModuleMessages } from 'src/common/enums/module-message.enum';
+import { ModuleMessages } from 'src/common/enums/api-enums/module-message.enum';
 import { CreateModuleDto } from './dto/create-module.dto';
 import { UpdateModuleDto } from './dto/update-module.dto';
 

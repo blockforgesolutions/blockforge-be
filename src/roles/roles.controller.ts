@@ -3,7 +3,7 @@ import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiSecurity } from '
 import { RolesService } from './roles.service';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { RoleMessages } from '../common/enums/messages.enum';
+import { RoleMessages } from '../common/enums/api-enums/messages.enum';
 import { RoleResponse, CreateRoleResponse, UpdateRoleResponse, DeleteRoleResponse } from './models/role.response';
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { RoleGuard } from 'src/common/guards/role.guard';

@@ -5,7 +5,7 @@ import { google } from 'googleapis';
 import * as fs from 'fs';
 import * as path from 'path';
 import { User } from '../user/user.schema';
-import { MailMessages } from '../common/enums/messages.enum';
+import { MailMessages } from '../common/enums/api-enums/messages.enum';
 
 @Injectable()
 export class MailService {

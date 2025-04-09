@@ -4,7 +4,7 @@ import { ApiOperation, ApiParam, ApiResponse, ApiSecurity } from '@nestjs/swagge
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { RoleGuard } from 'src/common/guards/role.guard';
 import { Roles } from 'src/common/decorators/roles.decorator';
-import { BlogMessages } from 'src/common/enums/blog-message.enum';
+import { BlogMessages } from 'src/common/enums/api-enums/blog-message.enum';
 import { BlogResponse } from './model/blog.response';
 import { CreateBlogDto } from './dto/create-blog.dto';
 import { UpdateBlogDto } from './dto/update-blog.dto';

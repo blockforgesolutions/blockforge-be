@@ -7,7 +7,7 @@ import { ChangePasswordDto } from '../user/dto/change-password.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { User } from './decorators/user.decorator';
 import { AuthResponse } from './models/auth.response';
-import { AuthMessages } from '../common/enums/messages.enum';
+import { AuthMessages } from '../common/enums/api-enums/messages.enum';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { FileInterceptor } from '@nestjs/platform-express';

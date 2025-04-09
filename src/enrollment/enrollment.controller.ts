@@ -2,7 +2,7 @@ import { Body, Controller, Delete, Get, Param, Post, Put, Request, UseGuards } f
 import { EnrollmentService } from './enrollment.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { ApiOperation, ApiResponse, ApiSecurity } from '@nestjs/swagger';
-import { EnrollmentMessages } from 'src/common/enums/enrollment-message.enum';
+import { EnrollmentMessages } from 'src/common/enums/api-enums/enrollment-message.enum';
 import { EnrollmentResponse } from './model/enrollment.response';
 import { CreateEnrollmentDto } from './dto/create-enrollment.dto';
 import { Roles } from 'src/common/decorators/roles.decorator';

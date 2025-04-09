@@ -6,7 +6,7 @@ import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { RoleGuard } from 'src/common/guards/role.guard';
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { ApiOperation, ApiParam, ApiResponse, ApiSecurity, ApiTags } from '@nestjs/swagger';
-import { LessonMessages } from 'src/common/enums/lesson-messages.enum';
+import { LessonMessages } from 'src/common/enums/api-enums/lesson-messages.enum';
 import { LessonResponse } from './model/lesson.response';
 import { FullCourseResponse } from './model/full-course.response';
 

@@ -5,7 +5,7 @@ import { Roles } from 'src/common/decorators/roles.decorator';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { RoleGuard } from 'src/common/guards/role.guard';
 import { CreateCategoryDto } from './dto/create-category.dto';
-import { CategoryMessages } from 'src/common/enums/category-message.enum';
+import { CategoryMessages } from 'src/common/enums/api-enums/category-message.enum';
 import { CategoryResponse } from './model/category.response';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 

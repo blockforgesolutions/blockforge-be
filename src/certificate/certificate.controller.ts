@@ -4,7 +4,7 @@ import { ApiOperation, ApiParam, ApiResponse, ApiSecurity, ApiTags } from '@nest
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { CreateCertificateDto } from './dto/create-certificate.dto';
 import { CertificateResponse } from './model/certificate.response';
-import { CertificateMessages } from 'src/common/enums/certificate-message.enum';
+import { CertificateMessages } from 'src/common/enums/api-enums/certificate-message.enum';
 import { UpdateCertificateDto } from './dto/update-certificate.dto';
 
 @ApiTags('Certificate')
