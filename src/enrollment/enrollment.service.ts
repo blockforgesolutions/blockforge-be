@@ -15,8 +15,8 @@ export class EnrollmentService {
         @InjectModel(EnrollmentModel.name) private readonly enrollmentModel: Model<EnrollmentModel>,
     ) { }
 
-    async createEnrollment(enrollment: CreateEnrollmentDto): Promise<EnrollmentResponse> {
-        const newEnrollment = await this.enrollmentModel.create(enrollment);
+    async createEnrollment(userId: string, enrollment: CreateEnrollmentDto): Promise<EnrollmentResponse> {
+        const newEnrollment = await this.enrollmentModel.create({ ...enrollment, userId });
 
         const translatedEnrollment = transformMongoData(newEnrollment.toObject(), EnrollmentResponse);
 
@@ -39,6 +39,12 @@ export class EnrollmentService {
         const transformedEnrollments = transformMongoArray(enrollments);
 
         return transformedEnrollments
+    }
+
+    async checkEnrollment(userId: string, courseId: string): Promise<boolean> {
+        const enrollment = await this.enrollmentModel.findOne({ userId, courseId }).lean();
+
+        return enrollment ? true : false
     }
 
     async getEnrollmentById(enrollmentId: string): Promise<EnrollmentResponse> {

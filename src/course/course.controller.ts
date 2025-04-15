@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { CourseService } from './course.service';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
@@ -8,12 +8,14 @@ import { Roles } from 'src/common/decorators/roles.decorator';
 import { ApiBody, ApiOperation, ApiParam, ApiResponse, ApiSecurity, ApiTags } from '@nestjs/swagger';
 import { CourseResponse } from './model/course.response';
 import { CourseMessages } from 'src/common/enums/course-message.enum';
+import { UserService } from 'src/user/user.service';
 
 @ApiTags('Course')
 @Controller('course')
 export class CourseController {
     constructor(
-        private readonly courseService: CourseService
+        private readonly courseService: CourseService,
+        private readonly userService: UserService
     ) { }
 
     @Post()
@@ -58,6 +60,37 @@ export class CourseController {
     @ApiResponse({ status: 404, description: CourseMessages.NOT_FOUND })
     async getCourseById(@Param('courseId') courseId: string) {
         return await this.courseService.getCourseById(courseId);
+    }
+
+    @Get('slug/:slug')
+    @ApiOperation({ summary: "Get course by slug", description: "Returns course by slug" })
+    @ApiResponse({
+        status: 200,
+        description: 'The course has been successfully fetched.',
+        type: CourseResponse
+    })
+    @ApiParam({
+        name: 'slug',
+        description: 'The course slug',
+    })
+    @ApiResponse({ status: 404, description: CourseMessages.NOT_FOUND })
+    async getCourseBySlug(@Param('slug') slug: string) {
+        return await this.courseService.getCourseBySlug(slug);
+    }
+
+    @Get('/categories/filter')
+    @ApiOperation({ summary: "Get courses by category id", description: "Returns courses by category id" })
+    @ApiResponse({
+        status: 200,
+        description: 'The courses have been successfully fetched.',
+        type: [CourseResponse]
+    })
+    async getCoursesByCategories(
+        @Query('categories') categories: string | string[],
+        @Query('page') page = 1,
+        @Query('limit') limit = 10,
+    ) {
+        return this.courseService.getCoursesByCategories(categories, Number(page), Number(limit));
     }
 
     @Put(':courseId')

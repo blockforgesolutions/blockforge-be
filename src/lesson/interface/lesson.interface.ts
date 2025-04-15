@@ -7,4 +7,5 @@ export interface Lesson {
     moduleId: Types.ObjectId;
     videoUrl: string;
     quiz?: [string];
+    slug:string
 }

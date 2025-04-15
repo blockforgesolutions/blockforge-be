@@ -8,6 +8,7 @@ import { Roles } from 'src/common/decorators/roles.decorator';
 import { ApiOperation, ApiParam, ApiResponse, ApiSecurity, ApiTags } from '@nestjs/swagger';
 import { LessonMessages } from 'src/common/enums/lesson-messages.enum';
 import { LessonResponse } from './model/lesson.response';
+import { FullCourseResponse } from './model/full-course.response';
 
 @ApiTags('Lessons')
 @Controller('lesson')
@@ -69,7 +70,7 @@ export class LessonController {
         return await this.lessonService.getLessonById(lessonId);
     }
 
-    @Get('getModuleLessons/:moduleId')
+    @Get('module/:moduleId')
     @ApiOperation({ summary: 'Get all lessons by module id', description: 'Returns all lessons by module id' })
     @ApiParam({ name: 'moduleId', type: String, description: 'The id of the module' })
     @ApiResponse({
@@ -79,6 +80,22 @@ export class LessonController {
     })
     async getLessonsByCourseId(@Param('moduleId') moduleId: string) {
         return await this.lessonService.getLessonsByModuleId(moduleId);
+    }
+
+    @Get('full-course/:lessonSlug')
+    @ApiOperation({ summary: 'Get a lesson by slug', description: 'Returns full course' })
+    @ApiParam({ name: 'lessonSlug', type: String, description: 'The slug of the lesson' })
+    @ApiResponse({
+        status: 200,
+        description: "Full course by lesson slug",
+        type: FullCourseResponse
+    })
+    @ApiResponse({
+        status: 404,
+        description: LessonMessages.NOT_FOUND
+    })
+    async getFullCourseByLessonSlug(@Param('lessonSlug') lessonSlug: string) {
+        return await this.lessonService.getFullCourseByLessonSlug(lessonSlug);
     }
 
     @Put(':lessonId')
