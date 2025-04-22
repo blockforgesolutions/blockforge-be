@@ -1,14 +1,15 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { CourseService } from './course.service';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { RoleGuard } from 'src/common/guards/role.guard';
 import { Roles } from 'src/common/decorators/roles.decorator';
-import { ApiBody, ApiOperation, ApiParam, ApiResponse, ApiSecurity, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiSecurity, ApiTags } from '@nestjs/swagger';
 import { CourseResponse } from './model/course.response';
 import { CourseMessages } from 'src/common/enums/api-enums/course-message.enum';
 import { UserService } from 'src/user/user.service';
+import { Status } from 'src/common/enums/status-enums';
 
 @ApiTags('Course')
 @Controller('course')
@@ -37,13 +38,14 @@ export class CourseController {
 
     @Get()
     @ApiOperation({ summary: "Get all courses", description: "Returns all courses" })
+    @ApiQuery({ name: 'status', required: false, enum: Status })
     @ApiResponse({
         status: 200,
         description: 'The courses have been successfully fetched.',
         type: [CourseResponse]
     })
-    async getCourses() {
-        return await this.courseService.getCourses();
+    async getCourses(@Query('status') status?: Status): Promise<CourseResponse[]> {
+        return await this.courseService.getCourses(status);
     }
 
     @Get(':courseId')
@@ -91,6 +93,28 @@ export class CourseController {
         @Query('limit') limit = 10,
     ) {
         return this.courseService.getCoursesByCategories(categories, Number(page), Number(limit));
+    }
+
+    @Patch('/publish/:courseId')
+    @ApiSecurity('bearer')
+    @UseGuards(JwtAuthGuard, RoleGuard)
+    @Roles('INSTRUCTOR', "ADMIN")
+    @ApiOperation({ summary: "Publish course", description: "Returns the published course" })
+    @ApiParam({
+        name: 'courseId',
+        description: 'The course id',
+    })
+    @ApiResponse({
+        status: 200,
+        description: CourseMessages.UPDATED,
+        type: CourseResponse
+    })
+    @ApiResponse({ status: 400, description: CourseMessages.INVALID_CREDENTIALS })
+    @ApiResponse({ status: 401, description: CourseMessages.UNAUTHORIZED_ACCESS })
+    @ApiResponse({ status: 403, description: CourseMessages.UNAUTHORIZED_ACCESS })
+    @ApiResponse({ status: 404, description: CourseMessages.NOT_FOUND })
+    async publishCourse(@Param('courseId') courseId: string) {
+        return await this.courseService.publishCourse(courseId);
     }
 
     @Put(':courseId')

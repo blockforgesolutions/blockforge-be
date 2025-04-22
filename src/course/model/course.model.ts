@@ -2,6 +2,7 @@ import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { Document, Schema as MongooseSchema } from 'mongoose'
 import { Course } from "../interface/course.interface";
 import slugify from "slugify";
+import { Status } from "src/common/enums/status-enums";
 
 export type CourseDocument = Course & Document;
 
@@ -24,6 +25,9 @@ export class CourseModel extends Document implements Course {
 
     @Prop({ type: String, required: false, unique: true })
     slug: string
+
+    @Prop({ type: String, required: false, default: Status.DRAFT })
+    status: Status
 
     @Prop({ type: [{ type: MongooseSchema.Types.ObjectId, ref: 'CategoryModel' }] })
     categories: MongooseSchema.Types.ObjectId[];

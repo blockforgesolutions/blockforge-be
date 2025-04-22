@@ -1,4 +1,5 @@
 import { Schema } from "mongoose";
+import { Status } from "src/common/enums/status-enums";
 
 export interface Course {
     title: string,
@@ -7,5 +8,6 @@ export interface Course {
     thumbnail?: string,
     price: number,
     slug:string,
+    status: Status,
     categories: Schema.Types.ObjectId[],
 }

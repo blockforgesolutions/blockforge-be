@@ -8,6 +8,7 @@ import { UpdateCourseDto } from './dto/update-course.dto';
 import { transformMongoArray, transformMongoDocument } from 'src/common/utils/mongo.utils';
 import { CourseResponse } from './model/course.response';
 import { transformMongoData } from 'src/common/utils/transform.utils';
+import { Status } from 'src/common/enums/status-enums';
 
 @Injectable()
 export class CourseService {
@@ -39,8 +40,12 @@ export class CourseService {
         return transformedCourse;
     }
 
-    async getCourses(): Promise<CourseResponse[]> {
-        const courses = await this.courseModel.find().populate('instructor', 'id name surname picture')
+    async getCourses(status?: Status): Promise<CourseResponse[]> {
+        const filter = status ? { status } : {};
+
+        const courses = await this.courseModel
+            .find(filter)
+            .populate('instructor', 'id name surname picture')
             .populate('categories', 'id name type slug')
             .lean();
 
@@ -76,7 +81,7 @@ export class CourseService {
         return transformedCourse;
     }
 
-    async getCoursesByCategories(categoryIds: string | string[], page: number, limit: number): Promise<CourseResponse[]> {        
+    async getCoursesByCategories(categoryIds: string | string[], page: number, limit: number): Promise<CourseResponse[]> {
         let filter = {};
 
         const categoryArray = Array.isArray(categoryIds) ? categoryIds : [categoryIds].filter(Boolean);
@@ -105,6 +110,29 @@ export class CourseService {
 
         return transformMongoArray<CourseDocument, CourseResponse>(courses);
     }
+
+    async publishCourse(courseId: string): Promise<CourseResponse> {
+        const course = await this.courseModel.findById(courseId);
+
+        if (!course) {
+            throw new HttpException(
+                new ErrorResponseDto('Course not found'),
+                HttpStatus.NOT_FOUND
+            );
+        }
+
+        course.status = Status.PUBLISHED;
+        await course.save();
+
+        await course.populate([
+            { path: 'instructor', select: 'id name surname picture' },
+            { path: 'categories', select: 'id name type slug' }
+        ]);
+
+        const transformedCourse = transformMongoData(course.toObject(), CourseResponse);
+        return transformedCourse;
+    }
+
 
     async updateCourse(courseId: string, course: UpdateCourseDto): Promise<CourseResponse> {
         const updatedCourse = await this.courseModel.findByIdAndUpdate(courseId, course, { new: true }).populate('instructor', 'id name surname').lean();
