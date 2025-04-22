@@ -26,15 +26,13 @@ export class EnrollmentService {
     async getEnrollments(): Promise<EnrollmentResponse[]> {
         const enrollments = await this.enrollmentModel.find().lean();
 
-        const transformedEnrollments = transformMongoArray(enrollments);
+        const transformedEnrollments = transformMongoArray<EnrollmentModel, EnrollmentResponse>(enrollments);
 
         return transformedEnrollments
     }
 
     async getUserEnrollments(userId: string): Promise<EnrollmentResponse[]> {
-        const enrollments = await this.enrollmentModel.find({ userId })
-            .populate('courseId', 'title description image')
-            .lean();
+        const enrollments = await this.enrollmentModel.find({ userId }).lean();
 
         const transformedEnrollments = transformMongoArray(enrollments);
 

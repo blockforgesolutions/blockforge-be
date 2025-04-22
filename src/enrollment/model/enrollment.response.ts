@@ -1,15 +1,15 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { Types } from "mongoose";
+import { Schema } from "mongoose";
 
 export class EnrollmentResponse {
     @ApiProperty({ example: "67daa8881f4c61f101046612" })
     id: string
     
     @ApiProperty({ example: "67daa8881f4c61f101046612" })
-    userId: Types.ObjectId
+    userId: Schema.Types.ObjectId
     
     @ApiProperty({ example: "67daa8881f4c61f101046612" })
-    courseId: Types.ObjectId
+    courseId: Schema.Types.ObjectId
     
     @ApiProperty({ example: 'PENDING' })
     paymentStatus: string
