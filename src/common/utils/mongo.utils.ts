@@ -1,3 +1,5 @@
+import mongoose from "mongoose";
+
 /**
  * Transforms MongoDB document by converting _id to id and removing __v
  * @param document The MongoDB document to transform
@@ -10,15 +12,23 @@ export function transformMongoDocument<T extends { _id: any; __v?: any }, R = T>
     return null;
   }
 
+  function isObjectId(value: any): value is mongoose.Types.ObjectId {
+    return mongoose.Types.ObjectId.isValid(value) && (value instanceof mongoose.Types.ObjectId);
+  }
+
   function transform(obj: any): any {
     if (Array.isArray(obj)) {
-      return obj.map(transform); 
+      return obj.map(transform);
     } else if (obj !== null && typeof obj === 'object') {
-      const { _id, __v, ...rest } = obj;
-  
       if (obj instanceof Date) {
         return obj.toISOString();
       }
+  
+      if (isObjectId(obj)) {
+        return obj.toString(); // <-- referans ObjectId'yi string yap
+      }
+  
+      const { _id, __v, ...rest } = obj;
   
       return {
         id: _id ? _id.toString() : obj.id,
@@ -27,6 +37,7 @@ export function transformMongoDocument<T extends { _id: any; __v?: any }, R = T>
         ),
       };
     }
+  
     return obj;
   }
 
